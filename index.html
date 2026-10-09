@@ -178,7 +178,7 @@ dl.glossary dt:target { background: var(--accent-weak); }
   .table-wrap table:has(td[data-label]) th, .table-wrap table:has(td[data-label]) td { display: block; border: 0; padding: 0.15rem 0.75rem; text-align: left; }
   .table-wrap table:has(td[data-label]) td[data-label]::before { content: attr(data-label) ": "; font-weight: 700; color: var(--muted); }
   figure { overflow-x: auto; }
-  figure > svg, figure .s6-panels > svg { min-width: 25rem; }
+  figure > svg, figure .s7-panels > svg { min-width: 25rem; }
 }
 
 /* print */
@@ -262,7 +262,7 @@ details.sources-box ul.sources, details.sources-box ol.all-sources { margin-top:
 <text x="162" y="540" font-size="14" font-weight="700">18%</text>
 <text x="240" y="568" font-size="15" text-anchor="middle" font-weight="700">답: 환불을 원할 확률 0.82</text>
 </svg>
-<figcaption><b>그림 1-1.</b> ① 모든 LLM이 만드는 점수표. ② 결정 모델의 logit 읽기. <a href="#s3">3절</a>의 계열 A가 이 방식으로 읽고, 계열 B는 같은 방식으로 보기 글자를 읽는다. Jev 내부가 이렇게 읽는지는 <span class="tag t-unverified">미확인</span>이다.</figcaption>
+<figcaption><b>그림 1-1.</b> ① 모든 LLM이 만드는 점수표. ② 결정 모델의 logit 읽기. <a href="#s4">4절</a>의 계열 A가 이 방식으로 읽고, 계열 B는 같은 방식으로 보기 글자를 읽는다. Jev 내부가 이렇게 읽는지는 <span class="tag t-unverified">미확인</span>이다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>① "오늘 날씨가 정말" 다음 빈칸에 올 수 있는 모든 토큰이 점수를 받는다. 예: 좋다 3.0, 덥다 2.4, 춥다 1.5, 사과 0.1. 생성 모델은 1등인 "좋다"를 골라 쓰고 다음 빈칸으로 넘어간다.</li>
@@ -275,7 +275,7 @@ details.sources-box ul.sources, details.sources-box ol.all-sources { margin-top:
 <ol>
 <li><b>점수표.</b> 모델은 빈칸마다 다음에 올 수 있는 모든 토큰에 점수를 매긴다. 이 점수가 <dfn>logit</dfn>이다.</li>
 <li><b>후보만 남기기.</b> 질문이 답으로 인정하는 토큰, 곧 <dfn id="d-allowed-tokens">허용 토큰</dfn>만 남긴다. 예/아니오 질문이면 <code>yes</code>와 <code>no</code>다. Jev는 이런 질문 타입을 <a class="term" href="#g-noul">Noul</a>이라 부른다. 후보가 여러 토큰으로 된 단어면 첫 토큰을 읽고, 첫 토큰이 겹치면 다음 빈칸을 한 번 더 읽어 확률을 곱한다<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a>. Hopper는 보기에 A, B, C 글자를 붙여 그 글자의 logit만 읽는다<a class="cite" href="https://huggingface.co/HopitAI/hopper" title="HopitAI/hopper 모델 카드">15</a> <span class="tag t-self">자체 보고</span>.</li>
-<li><b>확률로 바꾸기.</b> 남은 점수에 <a class="term" href="#g-softmax">softmax</a>(점수 목록을 합이 1인 확률로 바꾸는 함수)를 적용한다. 버린 칸은 빠지므로 후보끼리 다시 나눈 확률이 된다(그림 1-2). 그 전에 logit을 <a class="term" href="#g-temperature">온도</a>로 나눠 조정하기도 한다(<a href="#s4">4절</a>).</li>
+<li><b>확률로 바꾸기.</b> 남은 점수에 <a class="term" href="#g-softmax">softmax</a>(점수 목록을 합이 1인 확률로 바꾸는 함수)를 적용한다. 버린 칸은 빠지므로 후보끼리 다시 나눈 확률이 된다(그림 1-2). 그 전에 logit을 <a class="term" href="#g-temperature">온도</a>로 나눠 조정하기도 한다(<a href="#s5">5절</a>).</li>
 </ol>
 
 <figure id="fig-s1-renorm">
@@ -312,11 +312,11 @@ z       = logits[ids]                        # discard the rest of the vocabular
 p       = softmax(z / T[question.type])      # Hopper: per-type temperature map
 answer  = allowed[argmax(p)]
 return answer, p                             # nothing is generated: 0 output tokens</code></pre>
-<p>Hopper 카드는 이를 <q lang="en">a softmax over the logits of the option letters (A, B, C, ...), restricted to as many letters as there are options</q>라고 쓴다<a class="cite" href="https://huggingface.co/HopitAI/hopper" title="HopitAI/hopper 모델 카드">15</a>. 온도 <code>T</code>는 <a href="#s4">4절</a>에서 다룬다.</p>
+<p>Hopper 카드는 이를 <q lang="en">a softmax over the logits of the option letters (A, B, C, ...), restricted to as many letters as there are options</q>라고 쓴다<a class="cite" href="https://huggingface.co/HopitAI/hopper" title="HopitAI/hopper 모델 카드">15</a>. 온도 <code>T</code>는 <a href="#s5">5절</a>에서 다룬다.</p>
 </details>
 
 <h3 id="s1-speed">왜 빠른가</h3>
-<p>글을 쓰지 않기 때문이다. 일반 LLM은 답의 토큰 수만큼 계산(forward pass)을 되풀이하고, 결정 모델은 답 빈칸 하나만 계산한다(그림 1-3). 다만 "yes 또는 no 한 단어로 답하라"고 한 LLM도 토큰 하나만 생성하면 끝나므로, 그런 LLM보다 빠르다고 할 수는 없다<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a>. 질문을 묶을 때 메일을 한 번만 읽는 효과는 <a href="#s2">2절</a>에서 다룬다.</p>
+<p>글을 쓰지 않기 때문이다. 일반 LLM은 답의 토큰 수만큼 계산(forward pass)을 되풀이하고, 결정 모델은 답 빈칸 하나만 계산한다(그림 1-3). 다만 "yes 또는 no 한 단어로 답하라"고 한 LLM도 토큰 하나만 생성하면 끝나므로, 그런 LLM보다 빠르다고 할 수는 없다<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a>. 질문을 묶을 때 메일을 한 번만 읽는 효과는 <a href="#s3">3절</a>에서 다룬다.</p>
 
 <figure id="fig-s1-2">
 <svg viewBox="0 0 480 290" role="img" aria-labelledby="fig-s1-2-t">
@@ -359,7 +359,7 @@ return answer, p                             # nothing is generated: 0 output to
 <text x="269" y="204" font-size="12" text-anchor="middle" class="f-muted">2~7회: 계산하지 않음</text>
 <text x="16" y="274" font-size="14">결과: <tspan font-family="var(--mono)">yes</tspan> 82% · <tspan font-family="var(--mono)">no</tspan> 18% (쓴 토큰 0개)</text>
 </svg>
-<figcaption><b>그림 1-3.</b> 그림 1-1 ②의 질문을 일반 LLM과 결정 모델이 각각 처리할 때의 계산 횟수. 결정 모델은 위쪽 과정을 거치지 않는다. 칸 하나가 계산 1회다. 생성은 프로그램이 읽을 수 있게 답을 JSON 글로 쓴다. <dfn id="d-output-tokens">출력 토큰</dfn>은 모델이 <a class="term" href="#g-generation">생성</a>으로 써 낸 토큰이다. 계산 1회는 이 예처럼 답이 토큰 하나일 때만 맞는다. 계열별 횟수는 <a href="#s3-g">3절 비교표</a>에 있고, Jev의 횟수는 <span class="tag t-unverified">미확인</span>이다.</figcaption>
+<figcaption><b>그림 1-3.</b> 그림 1-1 ②의 질문을 일반 LLM과 결정 모델이 각각 처리할 때의 계산 횟수. 결정 모델은 위쪽 과정을 거치지 않는다. 칸 하나가 계산 1회다. 생성은 프로그램이 읽을 수 있게 답을 JSON 글로 쓴다. <dfn id="d-output-tokens">출력 토큰</dfn>은 모델이 <a class="term" href="#g-generation">생성</a>으로 써 낸 토큰이다. 계산 1회는 이 예처럼 답이 토큰 하나일 때만 맞는다. 계열별 횟수는 <a href="#s4-g">4절 비교표</a>에 있고, Jev의 횟수는 <span class="tag t-unverified">미확인</span>이다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>생성: <code>{"</code>, <code>answer</code>, <code>":</code>, <code> "</code>, <code>yes</code>, <code>"}</code>, 끝 토큰의 7칸을 하나씩 채운다. 칸마다 계산 1회, 모두 7회다. 결과는 글 <code>{"answer": "yes"}</code>이고, 프로그램이 이를 해석해 yes를 꺼낸다.</li>
@@ -370,7 +370,7 @@ return answer, p                             # nothing is generated: 0 output to
 
 
 <details class="deep"><summary>깊이 보기: forward pass 횟수와 비용</summary>
-<p>생성의 2회차부터는 <a class="term" href="#g-cache">KV cache 재사용</a>(앞서 계산한 중간 결과를 다시 쓰는 것)으로 새 토큰 하나만 처리한다. 그래서 forward pass 횟수의 차이가 곧 비용의 차이는 아니다. 보기마다 따로 점수를 내는 계열은 보기 수만큼, PCD는 스키마 전체에 2회를 쓴다(<a href="#s3-g">3절 비교표</a>). TypeSafe는 Jev가 토큰별로 생성하지 않고 모든 확률을 병렬로 낸다고만 쓴다<a class="cite" href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" title="Introducing System One Models and Jev">1</a> <span class="tag t-vendor">업체 발표</span>.</p>
+<p>생성의 2회차부터는 <a class="term" href="#g-cache">KV cache 재사용</a>(앞서 계산한 중간 결과를 다시 쓰는 것)으로 새 토큰 하나만 처리한다. 그래서 forward pass 횟수의 차이가 곧 비용의 차이는 아니다. 보기마다 따로 점수를 내는 계열은 보기 수만큼, PCD는 스키마 전체에 2회를 쓴다(<a href="#s4-g">4절 비교표</a>). TypeSafe는 Jev가 토큰별로 생성하지 않고 모든 확률을 병렬로 낸다고만 쓴다<a class="cite" href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" title="Introducing System One Models and Jev">1</a> <span class="tag t-vendor">업체 발표</span>.</p>
 <blockquote lang="en"><p>Jev outputs all probabilities in parallel instead of autoregressively generating by token.</p><footer><a class="cite" href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" title="Introducing System One Models and Jev">1</a></footer></blockquote>
 </details>
 
@@ -454,42 +454,104 @@ return answer, p                             # nothing is generated: 0 output to
 </ul></details>
 </section>
 
-<section id="s2"><h2>2. 여러 질문을 한 번에</h2>
+<section id="s2"><h2>2. BERT 분류기와 무엇이 다른가</h2>
+<p class="lead">둘 다 정해진 보기 중 하나를 확률과 함께 고른다. 다른 점은 보기를 정하는 때다. <a class="term" href="#g-bert-classifier">BERT 분류기</a>는 학습할 때 보기를 정하고, 결정 모델은 요청할 때 정한다.</p>
+
+<h3 id="s2-label">보기를 언제 정하나</h3>
+<p>BERT 분류기는 사전학습된 인코더 위에 출력층 하나를 붙여 fine-tuning한다. 이때 새로 생기는 파라미터는 분류층 가중치 W ∈ ℝ<sup>K×H</sup>뿐이고, K는 라벨 수다<a class="cite" href="https://arxiv.org/abs/1810.04805" title="BERT 논문">68</a>. 라벨 수가 출력층의 모양에 들어가므로, 라벨이 바뀌면 다시 학습해야 한다.</p>
+<p>결정 모델은 보기를 요청에 담는다. Jev API에서는 질문마다 <code>criteria</code>에 보기와 설명을 넣는다<a class="cite" href="https://docs.typesafe.ai/api" title="TypeSafe API Reference">3</a>. Decision 1.0 논문은 이를 "Candidate descriptions define each task at runtime"이라고 쓴다. 그리고 이 방식이 라벨을 고정된 출력 번호가 아니라 설명으로 주는 entailment 기반 zero-shot 분류와 이어진다고 쓴다<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a>.</p>
+
+<aside class="example">
+<p class="example-title">예: 고객 메일에 "환불" 팀을 추가할 때</p>
+<p>BERT 분류기를 billing, technical, sales 세 라벨로 학습했다면 출력층은 세 줄이다. refund를 추가하려면 데이터를 다시 모으고 다시 학습한다.</p>
+<p>결정 모델에서는 다음 요청의 <code>criteria</code>에 <code>"refund": "환불 요청"</code> 한 줄을 넣는다. 모델은 다시 학습하지 않는다.</p>
+</aside>
+
+<div class="table-wrap" id="s2-table"><table><caption>BERT 분류기와 결정 모델의 차이</caption>
+<thead><tr><th scope="col">항목</th><th scope="col">BERT 분류기</th><th scope="col">결정 모델</th></tr></thead>
+<tbody>
+<tr><th scope="row">보기를 정하는 때</th><td data-label="BERT 분류기">학습 때. 라벨 수 K가 출력층 모양이다<a class="cite" href="https://arxiv.org/abs/1810.04805" title="BERT 논문">68</a></td><td data-label="결정 모델">요청 때. 질문 타입은 Choice, Score, Noul이다<a class="cite" href="https://docs.typesafe.ai/concepts/system-one" title="TypeSafe System One 개념 문서">10</a></td></tr>
+<tr><th scope="row">새 작업</th><td data-label="BERT 분류기">다시 fine-tuning한다</td><td data-label="결정 모델">요청만 바꾼다<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></td></tr>
+<tr><th scope="row">확률을 읽는 곳</th><td data-label="BERT 분류기">[CLS] 위치의 벡터 하나를 고정된 출력층에 넣는다<a class="cite" href="https://arxiv.org/abs/1810.04805" title="BERT 논문">68</a></td><td data-label="결정 모델">디코더 계열은 보기 토큰의 <a class="term" href="#g-logit">logit</a>을 읽는다(<a href="#s1">1절</a>). 인코더 계열은 보기마다 놓은 표시 토큰에서 점수를 낸다<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></td></tr>
+<tr><th scope="row">한 번에 답하는 질문</th><td data-label="BERT 분류기">학습한 작업 하나</td><td data-label="결정 모델">여러 질문을 같은 상태에 대해 각각 따로 평가한다<a class="cite" href="https://docs.typesafe.ai/introduction" title="TypeSafe Introduction">17</a> <span class="tag t-vendor">업체 발표</span></td></tr>
+<tr><th scope="row"><a class="term" href="#g-calibration">보정</a></th><td data-label="BERT 분류기">기본 레시피의 목표가 아니다</td><td data-label="결정 모델">학습 목표에 들어간다(<a href="#s5">5절</a>, <a href="#s6">6절</a>)</td></tr>
+</tbody></table></div>
+
+<h3 id="s2-encoder">BERT로 만든 결정 모델도 있다</h3>
+<p>몸통이 BERT냐 아니냐로 둘을 가를 수는 없다. 둘을 가르는 것은 보기가 출력층에 있느냐, 입력에 있느냐다.</p>
+<ul>
+<li><b>Laya</b>는 ModernBERT-large 인코더에 decision head를 붙였다(<a href="#s4">4절</a> 계열 E). 보기를 입력 글에 넣고, 보기마다 자기 <code>[MASK]</code> 토큰에서 점수를 낸다<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a> <span class="tag t-self">자체 보고</span>.</li>
+<li><b>heman10x ModernBERT-151M</b>은 ModernBERT-base 기반이고, 보기 슬롯이 25개로 정해져 있다. 24개는 보기용이고 1개는 기권용이다<a class="cite" href="https://huggingface.co/heman10x/rlcd-modernbert-151m" title="heman10x ModernBERT-151M 카드">40</a> <span class="tag t-self">자체 보고</span>.</li>
+<li><b>Decision 1.0</b>의 모델 6개 중 Kai와 Lex는 양방향 인코더다<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a>.</li>
+</ul>
+
+<h3 id="s2-cost">보기를 입력에 넣는 대가</h3>
+<p><b>보기가 많으면 약하다.</b> Laya는 보기들이 정해진 토큰 예산을 나눠 쓴다. 보기가 77개인 Banking77에서는 라벨당 3-4토큰만 남아 정확도가 0.425다<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a> <span class="tag t-self">자체 보고</span>. 라벨이 출력층에 있는 BERT 분류기는 이 예산 문제가 없다.</p>
+<p><b>인코더 계열과 디코더 계열의 격차가 크다.</b> Intern-Decision-4B 카드의 표에서 7개 벤치마크 평균은 Laya 57.77, Intern-Decision-4B 90.02다. <a class="term" href="#g-ece">ECE</a>는 0.246과 0.065다. 다만 AG News처럼 라벨이 적은 작업에서는 Laya가 앞선다(92.84 대 90.82)<a class="cite" href="https://huggingface.co/internlm/Intern-Decision-4B" title="internlm/Intern-Decision-4B 카드">27</a> <span class="tag t-self">자체 보고</span>.</p>
+<p><b>속도는 인코더 쪽이 빠르다.</b> Laya는 T4 GPU에서 질문 하나에 39.5 ms다. 같은 카드가 인용한 Jev는 p50 236-276 ms다<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a> <span class="tag t-self">자체 보고</span>. Laya 쪽은 이 Jev 수치를 직접 재지 않았다고 밝힌다.</p>
+
+<aside class="note">
+<p><b>아직 모르는 것.</b> 라벨을 고정해 fine-tuning한 BERT 분류기와 결정 모델을 같은 작업에서 직접 비교한 자료는 찾지 못했다 <span class="tag t-unverified">미확인</span>. TypeSafe 문서와 블로그는 LLM과만 비교하고, Jev의 아키텍처도 밝히지 않는다<a class="cite" href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" title="Introducing System One Models and Jev">1</a>. 제3자 감사 논문은 Jev의 읽기 방식이 비슷한 라벨 확률 읽기보다 정확도가 낫다는 독립 근거가 없다고 쓴다. 이 논문은 Jev의 분명한 이점을 지연과 비용으로 본다<a class="cite" href="https://arxiv.org/abs/2609.32160" title="Jev 감사 논문 (arXiv 2609.32160)">69</a>.</p>
+</aside>
+
+<details class="deep"><summary>근거 보기: 원문</summary>
+<blockquote lang="en"><p>The only new parameters introduced during fine-tuning are classification layer weights W ∈ ℝ<sup>K×H</sup>, where K is the number of labels.</p><footer><a class="cite" href="https://arxiv.org/abs/1810.04805" title="BERT 논문">68</a></footer></blockquote>
+<blockquote lang="en"><p>Candidate descriptions define each task at runtime</p><footer><a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></footer></blockquote>
+<blockquote lang="en"><p>entailment-based zero-shot classification, where labels are supplied as descriptions rather than fixed output indices</p><footer><a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></footer></blockquote>
+<blockquote lang="en"><p>Every option is scored at its own <code>[MASK]</code> token, then softmaxed over that question's options. The answer space is defined at request time, so new schemas need no retraining.</p><footer><a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></footer></blockquote>
+<blockquote lang="en"><p>the typed readout itself has not shown an independent accuracy advantage over comparable label-probability readouts. Jev's clearest gains are in latency and cost.</p><footer><a class="cite" href="https://arxiv.org/abs/2609.32160" title="Jev 감사 논문 (arXiv 2609.32160)">69</a></footer></blockquote>
+</details>
+
+<details class="sources-box"><summary>이 절의 출처</summary><ul class="sources">
+<li><span class="src-n">[68]</span><a href="https://arxiv.org/abs/1810.04805">BERT 논문 (arXiv 1810.04805)</a>: 출력층 하나를 붙이는 fine-tuning, 분류층 가중치 K×H</li>
+<li><span class="src-n">[3]</span><a href="https://docs.typesafe.ai/api">TypeSafe API Reference</a>: 질문마다 요청에 담는 <code>criteria</code></li>
+<li><span class="src-n">[8]</span><a href="https://vllm-sr.ai/decision-paper.pdf">Decision 1.0 논문</a>: 실행 시점에 보기 설명으로 작업 정의, entailment 기반 zero-shot 분류와의 관계, 인코더 모델 Kai와 Lex</li>
+<li><span class="src-n">[10]</span><a href="https://docs.typesafe.ai/concepts/system-one">TypeSafe System One 개념 문서</a>: 질문 타입</li>
+<li><span class="src-n">[17]</span><a href="https://docs.typesafe.ai/introduction">TypeSafe Introduction</a>: 질문별 격리 평가</li>
+<li><span class="src-n">[32]</span><a href="https://huggingface.co/convaiinnovations/laya">convaiinnovations/laya 카드</a>: ModernBERT 인코더, 보기별 <code>[MASK]</code> 점수, Banking77, 지연</li>
+<li><span class="src-n">[40]</span><a href="https://huggingface.co/heman10x/rlcd-modernbert-151m">heman10x ModernBERT-151M 카드</a>: ModernBERT-base, 슬롯 25개</li>
+<li><span class="src-n">[27]</span><a href="https://huggingface.co/internlm/Intern-Decision-4B">internlm/Intern-Decision-4B 카드</a>: Laya와의 벤치마크 평균, ECE, AG News</li>
+<li><span class="src-n">[1]</span><a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev">Introducing System One Models and Jev</a>: LLM과의 비교, 아키텍처 비공개</li>
+<li><span class="src-n">[69]</span><a href="https://arxiv.org/abs/2609.32160">Jev 감사 논문 (arXiv 2609.32160)</a>: 정확도 이점의 독립 근거 부재, 지연과 비용 이점</li>
+</ul></details>
+</section>
+
+<section id="s3"><h2>3. 여러 질문을 한 번에</h2>
 <style>
-#s2 figure svg { max-width: 32rem; display: block; margin-inline: auto; }
+#s3 figure svg { max-width: 32rem; display: block; margin-inline: auto; }
 </style>
 <p class="lead">질문이 여러 개여도 <a class="term" href="#g-state">상태</a>(메일)는 한 번만 읽는다. 그리고 <a class="term" href="#g-question">질문</a> 사이에 칸막이를 쳐서 서로의 글을 못 보게 한다.</p>
 
 <figure id="fig-s2-1">
 <svg viewBox="0 0 480 426" role="img" aria-labelledby="fig-s2-1-t">
 <title id="fig-s2-1-t">같은 결정 모델에 질문 3개를 보내는 두 방식. 방식 A는 질문마다 API를 따로 호출해 메일을 3번 읽는다. 방식 B는 질문을 묶어 한 번 호출하고, 메일을 한 번 읽어 세 질문이 나눠 쓴다</title>
-<defs><marker id="s2-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted"/></marker></defs>
+<defs><marker id="s3-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted"/></marker></defs>
 <text x="16" y="18" font-size="15" font-weight="700">같은 결정 모델에 질문 3개를 보내는 두 방식</text>
 <text x="16" y="48" font-size="14" font-weight="700">방식 A. 질문마다 따로 호출</text>
 <text x="464" y="48" font-size="14" text-anchor="end" class="f-muted">API 호출 3번</text>
 <rect x="12" y="58" width="456" height="36" rx="6" class="f-none s-muted" stroke-width="1.5" stroke-dasharray="6 4"/>
 <rect x="20" y="62" width="136" height="28" rx="6" class="f-surface s-fg" stroke-width="1.5"/>
 <text x="88" y="81" font-size="14" text-anchor="middle">메일 읽기</text>
-<line x1="156" y1="76" x2="180" y2="76" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="156" y1="76" x2="180" y2="76" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <rect x="184" y="62" width="176" height="28" rx="6" class="f-bg s-fg" stroke-width="1.5"/>
 <text x="272" y="81" font-size="14" text-anchor="middle">환불을 원하나요?</text>
-<line x1="360" y1="76" x2="380" y2="76" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="360" y1="76" x2="380" y2="76" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <text x="388" y="81" font-size="14" font-weight="700">yes 0.82</text>
 <rect x="12" y="100" width="456" height="36" rx="6" class="f-none s-muted" stroke-width="1.5" stroke-dasharray="6 4"/>
 <rect x="20" y="104" width="136" height="28" rx="6" class="f-surface s-fg" stroke-width="1.5"/>
 <text x="88" y="123" font-size="14" text-anchor="middle">메일 읽기</text>
-<line x1="156" y1="118" x2="180" y2="118" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="156" y1="118" x2="180" y2="118" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <rect x="184" y="104" width="176" height="28" rx="6" class="f-bg s-fg" stroke-width="1.5"/>
 <text x="272" y="123" font-size="14" text-anchor="middle">어느 팀 문의인가요?</text>
-<line x1="360" y1="118" x2="380" y2="118" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="360" y1="118" x2="380" y2="118" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <text x="388" y="123" font-size="14" font-weight="700">배송</text>
 <rect x="12" y="142" width="456" height="36" rx="6" class="f-none s-muted" stroke-width="1.5" stroke-dasharray="6 4"/>
 <rect x="20" y="146" width="136" height="28" rx="6" class="f-surface s-fg" stroke-width="1.5"/>
 <text x="88" y="165" font-size="14" text-anchor="middle">메일 읽기</text>
-<line x1="156" y1="160" x2="180" y2="160" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="156" y1="160" x2="180" y2="160" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <rect x="184" y="146" width="176" height="28" rx="6" class="f-bg s-fg" stroke-width="1.5"/>
 <text x="272" y="165" font-size="14" text-anchor="middle">얼마나 화났나요?</text>
-<line x1="360" y1="160" x2="380" y2="160" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="360" y1="160" x2="380" y2="160" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <text x="388" y="165" font-size="14" font-weight="700">1.10</text>
 <text x="16" y="200" font-size="13" class="f-muted">점선 상자 하나 = API 호출 1번 · 메일 읽기 3번</text>
 <line x1="16" y1="216" x2="464" y2="216" class="s-line" stroke-width="1"/>
@@ -499,24 +561,24 @@ return answer, p                             # nothing is generated: 0 output to
 <rect x="20" y="260" width="136" height="118" rx="8" class="f-accent-weak s-accent" stroke-width="2"/>
 <text x="88" y="314" font-size="14" text-anchor="middle" font-weight="700">메일 읽기</text>
 <text x="88" y="334" font-size="13" text-anchor="middle" class="f-muted">1번, 나눠 쓴다</text>
-<line x1="156" y1="278" x2="180" y2="278" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="156" y1="278" x2="180" y2="278" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <rect x="184" y="264" width="176" height="28" rx="6" class="f-bg s-fg" stroke-width="1.5"/>
 <text x="272" y="283" font-size="14" text-anchor="middle">환불을 원하나요?</text>
-<line x1="360" y1="278" x2="380" y2="278" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="360" y1="278" x2="380" y2="278" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <text x="388" y="283" font-size="14" font-weight="700">yes 0.82</text>
-<line x1="156" y1="318" x2="180" y2="318" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="156" y1="318" x2="180" y2="318" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <rect x="184" y="304" width="176" height="28" rx="6" class="f-bg s-fg" stroke-width="1.5"/>
 <text x="272" y="323" font-size="14" text-anchor="middle">어느 팀 문의인가요?</text>
-<line x1="360" y1="318" x2="380" y2="318" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="360" y1="318" x2="380" y2="318" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <text x="388" y="323" font-size="14" font-weight="700">배송</text>
-<line x1="156" y1="358" x2="180" y2="358" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="156" y1="358" x2="180" y2="358" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <rect x="184" y="344" width="176" height="28" rx="6" class="f-bg s-fg" stroke-width="1.5"/>
 <text x="272" y="363" font-size="14" text-anchor="middle">얼마나 화났나요?</text>
-<line x1="360" y1="358" x2="380" y2="358" class="s-muted" stroke-width="2" marker-end="url(#s2-arr)"/>
+<line x1="360" y1="358" x2="380" y2="358" class="s-muted" stroke-width="2" marker-end="url(#s3-arr)"/>
 <text x="388" y="363" font-size="14" font-weight="700">1.10</text>
 <text x="16" y="412" font-size="13" class="f-muted">메일 읽기 1번 · 질문이 많을수록 더 아낀다 · TypeSafe가 권하는 방식</text>
 </svg>
-<figcaption><b>그림 2-1.</b> 질문을 보내는 두 방식. 사용자가 고른다. 모델은 같고, 다른 것은 API 호출 수와 메일 읽기 횟수다. "메일 읽기"는 상태를 <a class="term" href="#g-forward-pass">forward pass</a>를 해 <a class="term" href="#g-cache">KV cache</a>(다시 쓸 중간 결과)를 만드는 일이다. 방식 B에서 메일을 한 번 읽어 나눠 쓰는 구조는 <a class="term" href="#g-pcd">PCD</a>(기존 LLM에 붙여 쓰는 공개 디코딩 기법)에서 문서화되어 있고, Jev의 구현은 <span class="tag t-unverified">미확인</span>이다. TypeSafe는 방식 B를 권하고, 질문 13개를 묶으면 12.2배 싸고 10.0배 빠르며 답은 그대로라고 밝힌다<a class="cite" href="https://docs.typesafe.ai/cookbooks/parallel_questions" title="TypeSafe cookbook: parallel questions">18</a> <span class="tag t-vendor">업체 발표</span>.</figcaption>
+<figcaption><b>그림 3-1.</b> 질문을 보내는 두 방식. 사용자가 고른다. 모델은 같고, 다른 것은 API 호출 수와 메일 읽기 횟수다. "메일 읽기"는 상태를 <a class="term" href="#g-forward-pass">forward pass</a>를 해 <a class="term" href="#g-cache">KV cache</a>(다시 쓸 중간 결과)를 만드는 일이다. 방식 B에서 메일을 한 번 읽어 나눠 쓰는 구조는 <a class="term" href="#g-pcd">PCD</a>(기존 LLM에 붙여 쓰는 공개 디코딩 기법)에서 문서화되어 있고, Jev의 구현은 <span class="tag t-unverified">미확인</span>이다. TypeSafe는 방식 B를 권하고, 질문 13개를 묶으면 12.2배 싸고 10.0배 빠르며 답은 그대로라고 밝힌다<a class="cite" href="https://docs.typesafe.ai/cookbooks/parallel_questions" title="TypeSafe cookbook: parallel questions">18</a> <span class="tag t-vendor">업체 발표</span>.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>방식 A, 질문마다 따로 호출(API 호출 3번): 질문 "환불을 원하나요?", "어느 팀 문의인가요?", "얼마나 화났나요?"마다 메일을 다시 읽는다. 메일 읽기 3번.</li>
@@ -544,7 +606,7 @@ return answer, p                             # nothing is generated: 0 output to
 <text x="32" y="304" font-size="14" font-weight="700">질문 2: 이 고객은 무료 재배송 대상인가요?</text>
 <text x="16" y="346" font-size="14">→ 메일에 VIP라는 말이 없으니 <tspan font-weight="700">no</tspan></text>
 </svg>
-<figcaption><b>그림 2-2.</b> 질문 사이의 칸막이(격리). 칸막이가 없으면 같은 질문의 답이 함께 보낸 다른 질문에 따라 달라진다. TypeSafe는 모든 질문을 같은 상태에 대해 격리해 평가한다고 쓴다<a class="cite" href="https://docs.typesafe.ai/introduction" title="TypeSafe Introduction">17</a> <span class="tag t-vendor">업체 발표</span>.</figcaption>
+<figcaption><b>그림 3-2.</b> 질문 사이의 칸막이(격리). 칸막이가 없으면 같은 질문의 답이 함께 보낸 다른 질문에 따라 달라진다. TypeSafe는 모든 질문을 같은 상태에 대해 격리해 평가한다고 쓴다<a class="cite" href="https://docs.typesafe.ai/introduction" title="TypeSafe Introduction">17</a> <span class="tag t-vendor">업체 발표</span>.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>칸막이가 없으면: 질문 2 "이 고객은 무료 재배송 대상인가요?"가 메일과 함께 질문 1 "고객이 VIP라면 무료 재배송 대상인가요?"도 본다. 모델은 "VIP라면"이라는 가정을 사실처럼 이어받아 yes 쪽으로 흔들릴 수 있다.</li>
@@ -562,8 +624,8 @@ return answer, p                             # nothing is generated: 0 output to
 </tbody></table></div>
 
 <ul>
-<li id="s2-1"><b>TypeSafe가 말하는 것.</b> 모든 질문을 같은 상태에 대해 병렬로, 서로 격리해 평가한다<a class="cite" href="https://docs.typesafe.ai/introduction" title="TypeSafe Introduction">17</a> <span class="tag t-vendor">업체 발표</span>. 아키텍처 문서는 내지 않았다<a class="cite" href="https://proofstory.co/research/typesafe-ai/index.html" title="ProofStory TypeSafe 리포트">9</a>. 그래서 구현은 <span class="tag t-unverified">미확인</span>이다.</li>
-<li id="s2-2"><b>공개된 다른 결정 모델이 하는 것.</b> <dfn id="d-constrained-decoding">constrained decoding</dfn>은 허용된 토큰만 후보로 남기는 방식이고, <dfn id="d-pcd">PCD</dfn>(parallel constrained decoding)는 이를 여러 질문에 동시에 건다. PCD는 상태를 한 번 처리한 <a class="term" href="#g-cache">KV cache</a>를 질문별 시퀀스가 나눠 쓰고, 각 시퀀스에서 <a class="term" href="#g-allowed-tokens">허용 토큰</a> logit을 읽는다(<a href="#s1">1절</a>)<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a> <span class="tag t-self">자체 보고</span>.</li>
+<li id="s3-1"><b>TypeSafe가 말하는 것.</b> 모든 질문을 같은 상태에 대해 병렬로, 서로 격리해 평가한다<a class="cite" href="https://docs.typesafe.ai/introduction" title="TypeSafe Introduction">17</a> <span class="tag t-vendor">업체 발표</span>. 아키텍처 문서는 내지 않았다<a class="cite" href="https://proofstory.co/research/typesafe-ai/index.html" title="ProofStory TypeSafe 리포트">9</a>. 그래서 구현은 <span class="tag t-unverified">미확인</span>이다.</li>
+<li id="s3-2"><b>공개된 다른 결정 모델이 하는 것.</b> <dfn id="d-constrained-decoding">constrained decoding</dfn>은 허용된 토큰만 후보로 남기는 방식이고, <dfn id="d-pcd">PCD</dfn>(parallel constrained decoding)는 이를 여러 질문에 동시에 건다. PCD는 상태를 한 번 처리한 <a class="term" href="#g-cache">KV cache</a>를 질문별 시퀀스가 나눠 쓰고, 각 시퀀스에서 <a class="term" href="#g-allowed-tokens">허용 토큰</a> logit을 읽는다(<a href="#s1">1절</a>)<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a> <span class="tag t-self">자체 보고</span>.</li>
 </ul>
 
 <details class="deep"><summary>숫자 더 보기: TypeSafe가 밝힌 묶음 효과</summary>
@@ -603,26 +665,26 @@ return answer, p                             # nothing is generated: 0 output to
 </ul></details>
 </section>
 
-<section id="s3"><h2>3. 결정 모델의 여섯 계열</h2>
+<section id="s4"><h2>4. 결정 모델의 여섯 계열</h2>
 <style>
-#s3 ul.s6-facts { list-style: none; padding-left: 0; margin: 0 0 1rem; }
-#s3 ul.s6-facts li { padding: 0.15rem 0 0.15rem 0.75rem; border-left: 3px solid var(--line); }
-#s3 ul.s6-facts b { color: var(--muted); }
-#s3 p.s6-rep { margin-top: 0; }
-#s3 p.s6-rep b { color: var(--muted); }
-#s3 .s6-panels { display: grid; grid-template-columns: 1fr; gap: 1rem 1.25rem; }
-#s3 #fig-s3-diffusion svg { display: block; width: 100%; max-width: 26rem; margin-inline: auto; }
-#s3 #fig-s6-3 svg { display: block; width: 100%; max-width: 480px; }
+#s4 ul.s7-facts { list-style: none; padding-left: 0; margin: 0 0 1rem; }
+#s4 ul.s7-facts li { padding: 0.15rem 0 0.15rem 0.75rem; border-left: 3px solid var(--line); }
+#s4 ul.s7-facts b { color: var(--muted); }
+#s4 p.s7-rep { margin-top: 0; }
+#s4 p.s7-rep b { color: var(--muted); }
+#s4 .s7-panels { display: grid; grid-template-columns: 1fr; gap: 1rem 1.25rem; }
+#s4 #fig-s3-diffusion svg { display: block; width: 100%; max-width: 26rem; margin-inline: auto; }
+#s4 #fig-s6-3 svg { display: block; width: 100%; max-width: 480px; }
 @media (min-width: 44rem) {
-  #s3 .s6-panels { grid-template-columns: 1fr 1fr; }
-  #s3 .s6-panels > svg:last-child:nth-child(odd) { grid-column: 1 / -1; width: calc(50% - 0.625rem); justify-self: center; }
+  #s4 .s7-panels { grid-template-columns: 1fr 1fr; }
+  #s4 .s7-panels > svg:last-child:nth-child(odd) { grid-column: 1 / -1; width: calc(50% - 0.625rem); justify-self: center; }
 }
 </style>
 <p class="lead">결정 모델마다 답을 읽는 곳이 다르다. 공개된 모델과 기법은 여섯 계열로 나뉜다.</p>
 <p>여기서 다루는 것은 Jev와 같은 입출력(상태와 질문 → 확률)을 따르는 제3자의 공개 모델과 기법이다. Jev가 어느 계열인지는 <span class="tag t-unverified">미확인</span>이다.</p>
 
 <figure id="fig-s6-1">
-<div class="s6-panels">
+<div class="s7-panels">
 <svg viewBox="0 0 340 158" role="img" aria-labelledby="fig-s3-a-t">
 <title id="fig-s3-a-t">A. PCD: 기존 LLM 그대로 · 학습 없음</title>
 <text x="0" y="18" font-size="15" font-weight="700">A. PCD</text>
@@ -637,7 +699,7 @@ return answer, p                             # nothing is generated: 0 output to
 <rect x="226" y="56" width="48" height="28" rx="5" class="f-accent-weak s-accent" stroke-width="2" stroke-dasharray="5 3"/>
 <text x="250.0" y="75.0" font-size="13" text-anchor="middle">?</text>
 <text x="0" y="112" font-size="13">빈칸에서 "배송"·"결제" 첫 토큰의 점수만 읽는다</text>
-<text x="0" y="136" font-size="13" class="f-muted">질문이 여럿이면 메일은 한 번만 읽는다(2절)</text>
+<text x="0" y="136" font-size="13" class="f-muted">질문이 여럿이면 메일은 한 번만 읽는다(3절)</text>
 </svg>
 <svg viewBox="0 0 340 158" role="img" aria-labelledby="fig-s3-b-t">
 <title id="fig-s3-b-t">B. 글자 logit + fine-tuning: 이 일에 맞게 fine-tuning한 LLM</title>
@@ -700,7 +762,7 @@ return answer, p                             # nothing is generated: 0 output to
 <rect x="226" y="56" width="90" height="28" rx="5" class="f-accent-weak s-accent" stroke-width="2" stroke-dasharray="5 3"/>
 <text x="271.0" y="75.0" font-size="13" text-anchor="middle">[M] 결제</text>
 <text x="0" y="112" font-size="13">보기마다 붙인 [M] 자리의 점수를 읽는다</text>
-<text x="0" y="136" font-size="13" class="f-muted">학습할 때 점수 규칙을 보상으로 쓴다(5절)</text>
+<text x="0" y="136" font-size="13" class="f-muted">학습할 때 점수 규칙을 보상으로 쓴다(6절)</text>
 </svg>
 <svg viewBox="0 0 340 158" role="img" aria-labelledby="fig-s3-f-t">
 <title id="fig-s3-f-t">F. text diffusion: diffusion LLM 그대로 · 학습 없음</title>
@@ -719,7 +781,7 @@ return answer, p                             # nothing is generated: 0 output to
 <text x="0" y="134" font-size="13">허용 토큰(배송·결제) 중 점수가 큰 것을 고른다</text>
 </svg>
 </div>
-<figcaption><b>그림 3-1.</b> 여섯 계열이 같은 질문 "어느 팀 문의인가요? (배송 / 결제)"를 읽는 법. 점선 칸이 답을 읽는 곳이다. 오른쪽 위는 계산(forward pass) 횟수다. 방식과 횟수는 아래 각 계열의 출처에서 왔다.</figcaption>
+<figcaption><b>그림 4-1.</b> 여섯 계열이 같은 질문 "어느 팀 문의인가요? (배송 / 결제)"를 읽는 법. 점선 칸이 답을 읽는 곳이다. 오른쪽 위는 계산(forward pass) 횟수다. 방식과 횟수는 아래 각 계열의 출처에서 왔다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>A. PCD (호출당 2회): 기존 LLM을 학습 없이 쓴다. 입력은 <code>"팀": "</code> 앞에서 끝나고, 빈칸에서 "배송"과 "결제" 첫 토큰의 점수만 읽는다.</li>
@@ -731,43 +793,43 @@ return answer, p                             # nothing is generated: 0 output to
 </ul></details>
 </figure>
 
-<h3 id="s3-g">여섯 계열 한눈에</h3>
+<h3 id="s4-g">여섯 계열 한눈에</h3>
 <div class="table-wrap"><table><caption>결정 모델의 여섯 계열</caption>
 <thead><tr><th scope="col">계열</th><th scope="col">어떻게 읽나</th><th scope="col">학습</th><th scope="col">계산 횟수</th><th scope="col">대표 모델</th></tr></thead>
 <tbody>
-<tr><th scope="row"><a href="#s3-a">A. PCD</a></th><td data-label="어떻게 읽나">빈칸에서 보기 첫 토큰의 점수</td><td data-label="학습">없음</td><td data-label="계산 횟수">호출당 2회<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a></td><td data-label="대표 모델">harshatheg, stephanj, openjev-sglang</td></tr>
-<tr><th scope="row"><a href="#s3-b">B. 글자 logit + fine-tuning</a></th><td data-label="어떻게 읽나">빈칸에서 보기 글자(A, B)의 점수</td><td data-label="학습">LoRA 또는 전체</td><td data-label="계산 횟수">호출당 1회 (Hopper 보기 77개는 4회)<a class="cite" href="https://huggingface.co/HopitAI/hopper" title="HopitAI/hopper 모델 카드">15</a></td><td data-label="대표 모델">decider, Hopper, Jebadiah, Nimble, Intern-Decision</td></tr>
-<tr><th scope="row"><a href="#s3-c">C. candidate head</a></th><td data-label="어떻게 읽나">보기 끝 hidden state를 채점기로</td><td data-label="학습">head와 몸통</td><td data-label="계산 횟수">질문당 1회<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></td><td data-label="대표 모델">Decision 1.0, MoJev, NanoJev, Kev</td></tr>
-<tr><th scope="row"><a href="#s3-d">D. 보기별 점수화</a></th><td data-label="어떻게 읽나">보기마다 따로 분류 점수</td><td data-label="학습">분류 모델 전체</td><td data-label="계산 횟수">보기당 1회<a class="cite" href="https://huggingface.co/AlexWortega/openjev" title="AlexWortega/openjev 카드">30</a></td><td data-label="대표 모델">AlexWortega openjev</td></tr>
-<tr><th scope="row"><a href="#s3-e">E. RL 인코더</a></th><td data-label="어떻게 읽나">보기마다 붙인 [M] 자리의 점수</td><td data-label="학습">인코더와 head, RL</td><td data-label="계산 횟수">호출당 배치 1회<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></td><td data-label="대표 모델">Laya</td></tr>
-<tr><th scope="row"><a href="#s3-f">F. text diffusion</a></th><td data-label="어떻게 읽나">JSON 빈칸을 고쳐 쓴 뒤 허용 토큰 고르기</td><td data-label="학습">없음</td><td data-label="계산 횟수">캔버스당 디노이징 N단계<a class="cite" href="https://github.com/JoshuaSP/open-jev" title="JoshuaSP/open-jev README">20</a></td><td data-label="대표 모델">open-jev (<a href="https://huggingface.co/google/diffusiongemma-26B-A4B-it">DiffusionGemma</a>)</td></tr>
+<tr><th scope="row"><a href="#s4-a">A. PCD</a></th><td data-label="어떻게 읽나">빈칸에서 보기 첫 토큰의 점수</td><td data-label="학습">없음</td><td data-label="계산 횟수">호출당 2회<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a></td><td data-label="대표 모델">harshatheg, stephanj, openjev-sglang</td></tr>
+<tr><th scope="row"><a href="#s4-b">B. 글자 logit + fine-tuning</a></th><td data-label="어떻게 읽나">빈칸에서 보기 글자(A, B)의 점수</td><td data-label="학습">LoRA 또는 전체</td><td data-label="계산 횟수">호출당 1회 (Hopper 보기 77개는 4회)<a class="cite" href="https://huggingface.co/HopitAI/hopper" title="HopitAI/hopper 모델 카드">15</a></td><td data-label="대표 모델">decider, Hopper, Jebadiah, Nimble, Intern-Decision</td></tr>
+<tr><th scope="row"><a href="#s4-c">C. candidate head</a></th><td data-label="어떻게 읽나">보기 끝 hidden state를 채점기로</td><td data-label="학습">head와 몸통</td><td data-label="계산 횟수">질문당 1회<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></td><td data-label="대표 모델">Decision 1.0, MoJev, NanoJev, Kev</td></tr>
+<tr><th scope="row"><a href="#s4-d">D. 보기별 점수화</a></th><td data-label="어떻게 읽나">보기마다 따로 분류 점수</td><td data-label="학습">분류 모델 전체</td><td data-label="계산 횟수">보기당 1회<a class="cite" href="https://huggingface.co/AlexWortega/openjev" title="AlexWortega/openjev 카드">30</a></td><td data-label="대표 모델">AlexWortega openjev</td></tr>
+<tr><th scope="row"><a href="#s4-e">E. RL 인코더</a></th><td data-label="어떻게 읽나">보기마다 붙인 [M] 자리의 점수</td><td data-label="학습">인코더와 head, RL</td><td data-label="계산 횟수">호출당 배치 1회<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></td><td data-label="대표 모델">Laya</td></tr>
+<tr><th scope="row"><a href="#s4-f">F. text diffusion</a></th><td data-label="어떻게 읽나">JSON 빈칸을 고쳐 쓴 뒤 허용 토큰 고르기</td><td data-label="학습">없음</td><td data-label="계산 횟수">캔버스당 디노이징 N단계<a class="cite" href="https://github.com/JoshuaSP/open-jev" title="JoshuaSP/open-jev README">20</a></td><td data-label="대표 모델">open-jev (<a href="https://huggingface.co/google/diffusiongemma-26B-A4B-it">DiffusionGemma</a>)</td></tr>
 </tbody></table></div>
 
 <details class="deep"><summary>근거 보기: 이 절의 근거와 트래커의 분류</summary>
-<p>TypeSafe가 학습 방법에 대해 공개한 것은 <a class="term" href="#g-rlcd">RLCD</a>라는 이름과 한 줄 정의다(<a href="#s5">5절</a>).<a class="cite" href="https://docs.typesafe.ai/introduction/machine-learning-primer" title="TypeSafe machine learning primer">24</a> 알고리즘 세부는 공식 페이지에서 찾지 못했다. <span class="tag t-unverified">미확인</span> 그래서 이 절의 근거는 결정 모델의 공개 코드와 모델 카드다.</p>
+<p>TypeSafe가 학습 방법에 대해 공개한 것은 <a class="term" href="#g-rlcd">RLCD</a>라는 이름과 한 줄 정의다(<a href="#s6">6절</a>).<a class="cite" href="https://docs.typesafe.ai/introduction/machine-learning-primer" title="TypeSafe machine learning primer">24</a> 알고리즘 세부는 공식 페이지에서 찾지 못했다. <span class="tag t-unverified">미확인</span> 그래서 이 절의 근거는 결정 모델의 공개 코드와 모델 카드다.</p>
 <p>커뮤니티 트래커는 Decoding, Trained, Diffusion 등으로 나눈다.<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a> 이 문서의 A는 Decoding, B부터 E는 Trained, F는 Diffusion에 해당한다.</p>
 <p>보통은 어휘 <a class="term" href="#g-head">head</a>가 마지막 hidden state를 어휘 전체의 <a class="term" href="#g-logit">logit</a>으로 바꾼다.</p>
 </details>
 
-<h3 id="s3-a">A. PCD (parallel constrained decoding)</h3>
-<p>기존 LLM을 학습 없이 그대로 쓴다. 답 빈칸에서 보기 첫 토큰의 점수만 읽는 <a href="#s1">1절</a>의 방식에, 메일을 한 번만 읽는 <a href="#s2">2절</a>의 묶기를 더했다.<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a><a class="cite" href="https://huggingface.co/harshatheg/Qwen-2.5-1B-RLCD" title="harshatheg/Qwen-2.5-1B-RLCD 모델 카드">7</a><a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a></p>
-<p class="s6-rep"><b>대표 모델</b>: harshatheg Qwen-2.5-1B-RLCD<a class="cite" href="https://huggingface.co/harshatheg/Qwen-2.5-1B-RLCD" title="harshatheg/Qwen-2.5-1B-RLCD 모델 카드">7</a>, stephanj parallelConstraintDecoding, openjev-sglang, Jobe.<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a></p>
+<h3 id="s4-a">A. PCD (parallel constrained decoding)</h3>
+<p>기존 LLM을 학습 없이 그대로 쓴다. 답 빈칸에서 보기 첫 토큰의 점수만 읽는 <a href="#s1">1절</a>의 방식에, 메일을 한 번만 읽는 <a href="#s3">3절</a>의 묶기를 더했다.<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a><a class="cite" href="https://huggingface.co/harshatheg/Qwen-2.5-1B-RLCD" title="harshatheg/Qwen-2.5-1B-RLCD 모델 카드">7</a><a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a></p>
+<p class="s7-rep"><b>대표 모델</b>: harshatheg Qwen-2.5-1B-RLCD<a class="cite" href="https://huggingface.co/harshatheg/Qwen-2.5-1B-RLCD" title="harshatheg/Qwen-2.5-1B-RLCD 모델 카드">7</a>, stephanj parallelConstraintDecoding, openjev-sglang, Jobe.<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a></p>
 <details class="deep"><summary>깊이 보기: 계열 A의 세부와 한계</summary>
-<p>동작 단계는 <a href="#s2">2절</a>의 <a class="term" href="#g-pcd">PCD</a>와 같다. 구현은 질문을 필드라 부른다.</p>
-<ul class="s6-facts">
+<p>동작 단계는 <a href="#s3">3절</a>의 <a class="term" href="#g-pcd">PCD</a>와 같다. 구현은 질문을 필드라 부른다.</p>
+<ul class="s7-facts">
 <li><b>forward pass</b>: 호출 하나에 2회(prefill 1회와 질문 배치 1회). 첫 토큰이 같은 보기가 있으면 단계마다 1회가 더 든다. <span class="tag t-self">자체 보고</span><a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a></li>
 <li><b>학습하는 것</b>: 없음. 이름에 <a class="term" href="#g-rlcd">RLCD</a>가 붙은 LFM 모델도 학습하지 않았다고 밝힌다.<a class="cite" href="https://huggingface.co/monotykamary/LFM2.5-2.6B-RLCD" title="monotykamary/LFM2.5-2.6B-RLCD 카드">26</a></li>
 <li><b>저자가 밝힌 한계</b>: 두 엔진의 결과 차이는 디코딩이 아니라 서로 다른 프롬프트에서 나왔다.<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a></li>
 </ul></details>
 
-<h3 id="s3-b">B. 글자 logit + fine-tuning</h3>
+<h3 id="s4-b">B. 글자 logit + fine-tuning</h3>
 <p>보기에 A, B 같은 글자를 붙이고, 답 빈칸에서 그 글자의 점수만 읽는다. 모델은 이 일에 맞게 <a class="term" href="#g-fine-tuning">fine-tuning</a>한다.<a class="cite" href="https://github.com/Mapika/decider" title="Mapika/decider README">13</a></p>
-<p class="s6-rep"><b>대표 모델</b>: decider, Hopper, Jebadiah-27B, Nimble, Intern-Decision.</p>
+<p class="s7-rep"><b>대표 모델</b>: decider, Hopper, Jebadiah-27B, Nimble, Intern-Decision.</p>
 <details class="deep"><summary>깊이 보기: 계열 B의 실제 예와 한계</summary>
 <p><a href="#s1">1절</a>의 <a class="term" href="#g-readout">logit 읽기</a>에 fine-tuning을 더한 계열이다.</p>
-<ul class="s6-facts">
+<ul class="s7-facts">
 <li><b>forward pass</b>: 호출 하나에 1회. decider는 질문 N개의 답 자리를 한 번에 읽는다.<a class="cite" href="https://github.com/Mapika/decider" title="Mapika/decider README">13</a> Hopper는 보기가 26개를 넘으면 토너먼트로 나눠, 보기 77개에 forward pass 4회를 쓴다. <span class="tag t-self">자체 보고</span><a class="cite" href="https://huggingface.co/HopitAI/hopper" title="HopitAI/hopper 모델 카드">15</a></li>
-<li><b>학습하는 것</b>: 모델 전체 또는 <a class="term" href="#g-lora">LoRA</a>. loss는 <a href="#s5">5절</a>이 다룬다.</li>
+<li><b>학습하는 것</b>: 모델 전체 또는 <a class="term" href="#g-lora">LoRA</a>. loss는 <a href="#s6">6절</a>이 다룬다.</li>
 <li><b>변형</b>: Intern-Decision은 보기를 한 토큰 기호로 바꾸고 답 자리 직전의 logit을 읽는다.<a class="cite" href="https://huggingface.co/internlm/Intern-Decision-4B" title="internlm/Intern-Decision-4B 카드">27</a> lev는 문자 logit과 후보 경로 head를 함께 쓴다.<a class="cite" href="https://huggingface.co/interfaze-ai/lev" title="interfaze-ai/lev 모델 카드">5</a> Together Tev1은 예외로 문자 하나를 실제로 생성한다.<a class="cite" href="https://huggingface.co/togethercomputer/Tev1-4B-experimental" title="Tev1-4B-experimental 카드">28</a></li>
 <li><b>저자가 밝힌 한계</b>: forward pass 한 번으로는 다단계 산술을 못 한다(<a href="#s1">1절</a>).<a class="cite" href="https://github.com/Mapika/decider" title="Mapika/decider README">13</a></li>
 </ul>
@@ -785,9 +847,9 @@ return answer, p                             # nothing is generated: 0 output to
 #              "frustration": {"score": 0.76, "probabilities": {"0": 0.34, "1": 0.55, "2": 0.10}, ...}}}</code></pre></aside>
 </details>
 
-<h3 id="s3-c">C. candidate head</h3>
+<h3 id="s4-c">C. candidate head</h3>
 <p>글자 점수표 대신, 보기마다 끝 토큰의 <dfn id="d-hidden-state">hidden state</dfn>(모델 안에서 토큰마다 만드는 숫자 벡터)를 꺼내 전용 채점기(후보 <a class="term" href="#g-head">head</a>)로 점수를 매긴다.<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></p>
-<p class="s6-rep"><b>대표 모델</b>: Decision 1.0 Eos, Sol, Nox, Lux, MoJev, NanoJev, Kev.</p>
+<p class="s7-rep"><b>대표 모델</b>: Decision 1.0 Eos, Sol, Nox, Lux, MoJev, NanoJev, Kev.</p>
 <details class="deep"><summary>깊이 보기: 계열 C의 단계별 순서, 점수 식, 한계</summary>
 <p>Decision 1.0 논문의 순서다.<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></p>
 <ol>
@@ -799,30 +861,30 @@ return answer, p                             # nothing is generated: 0 output to
 <li>점수를 온도로 나누고 후보 전체에 softmax해 확률을 만든다.</li>
 <li>Choice는 확률이 가장 큰 후보를 고른다. Noul은 true 후보의 확률을 낸다. Score는 확률로 가중한 단계 번호를 낸다.</li>
 </ol>
-<p>논문 3.2절의 식 3이다. <code>h_i</code>는 후보 i의 끝 hidden state, <code>h_q</code>는 접미 끝 hidden state다.<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></p>
+<p>논문 3.3절의 식 3이다. <code>h_i</code>는 후보 i의 끝 hidden state, <code>h_q</code>는 접미 끝 hidden state다.<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></p>
 <pre><code>c_i = LN_c(h_i);  q = LN_q(h_q)
 z_i = (W_k c_i)^T (W_q q) / sqrt(d_h)  +  w^T GELU(A_c c_i + A_q q + b),   d_h = 256
 p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code></pre>
-<ul class="s6-facts">
+<ul class="s7-facts">
 <li><b>forward pass</b>: 질문 하나에 1회. 질문 사이에 상태 계산을 재사용하지 않는다.<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></li>
 <li><b>학습하는 것</b>: candidate head와 백본. 논문은 전체 모델 적응을 Eos에만 명시한다. Sol, Nox, Lux의 학습 범위는 논문에 없다. <span class="tag t-unverified">미확인</span><a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></li>
 <li><b>다른 모델</b>: MoJev는 readout이 후보마다 logit 하나를 낸다.<a class="cite" href="https://github.com/MoLeMo-Lab/mojev" title="MoJev README">19</a> NanoJev는 백본이 후보 경로를 인코딩하고 공유 head가 확률을 낸다.<a class="cite" href="https://github.com/TianyuCodings/NanoJev" title="TianyuCodings/NanoJev README">29</a> Kev의 pointer head도 보기 끝 토큰을 점수화하므로 이 계열로 묶는다.<a class="cite" href="https://huggingface.co/jaredpalmer/kev-4b" title="jaredpalmer/kev-4b 모델 카드">22</a></li>
 <li><b>저자가 밝힌 한계</b>: 출력 토큰을 없앤 것만으로 한 토큰 생성 분류기보다 빠르다고 할 수 없다(<a href="#s1">1절</a>).<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></li>
 </ul></details>
 
-<h3 id="s3-d">D. 보기별 점수화</h3>
+<h3 id="s4-d">D. 보기별 점수화</h3>
 <p>메일과 보기 하나를 짝지어 보기마다 따로 계산한다. 쓰는 모델은 <dfn id="d-cross-encoder">cross-encoder</dfn>(두 글을 함께 읽는 분류 모델)다. 보기가 K개면 계산도 K번이다.<a class="cite" href="https://huggingface.co/AlexWortega/openjev" title="AlexWortega/openjev 카드">30</a></p>
-<p class="s6-rep"><b>대표 모델</b>: AlexWortega openjev.</p>
+<p class="s7-rep"><b>대표 모델</b>: AlexWortega openjev.</p>
 <details class="deep"><summary>깊이 보기: 계열 D의 세부와 한계</summary>
 <p>AlexWortega openjev는 NLI cross-encoder 하나를 쓴다. NLI는 전제가 가설을 지지하는지 판정하는 작업이다.<a class="cite" href="https://huggingface.co/AlexWortega/openjev" title="AlexWortega/openjev 카드">30</a></p>
-<ul class="s6-facts">
+<ul class="s7-facts">
 <li><b>forward pass</b>: 보기마다 1회, 보기 K개면 K회. 보기 순서는 답을 바꾸지 않는다. <span class="tag t-self">자체 보고</span><a class="cite" href="https://huggingface.co/AlexWortega/openjev" title="AlexWortega/openjev 카드">30</a></li>
 <li><b>학습하는 것</b>: Qwen3.5 시퀀스 분류 모델 전체(라벨 3개).</li>
 <li><b>다른 모델</b>: pngwn scorer는 보기별 점수를 forward pass 한 번에 낸다.<a class="cite" href="https://huggingface.co/pngwn/system-one-qwen3.5-4b-scorer-v2b" title="pngwn scorer v2b 카드">31</a></li>
 <li><b>저자가 밝힌 한계</b>: 프롬프트 인젝션에 약하다. 상태에 적대적 한 줄을 넣으면 JevBench 150문항 정확도가 0.833에서 0.467로 떨어진다. <span class="tag t-self">자체 보고</span><a class="cite" href="https://huggingface.co/AlexWortega/openjev" title="AlexWortega/openjev 카드">30</a></li>
 </ul></details>
 
-<h3 id="s3-e">E. RL 인코더</h3>
+<h3 id="s4-e">E. RL 인코더</h3>
 <p>보기마다 <code>[MASK]</code> 표시를 붙이고 그 자리의 점수를 읽는다. 모델은 앞뒤를 모두 보는 인코더다<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a>.</p>
 <p>학습은 정답을 직접 주는 대신, 모델이 낸 확률에 점수만 매겨 주는 <a class="term" href="#g-rl">RL</a>로 한다.</p>
 <ol>
@@ -830,18 +892,18 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 <li><b>채점.</b> 실제 답과 비교해 후보마다 보상을 준다. 보상은 <a class="term" href="#g-proper-scoring">proper scoring rule</a>로 계산한다. 이 규칙은 믿는 확률을 그대로 말할 때 점수가 가장 좋아서, 과장하면 손해다.</li>
 <li><b>이동.</b> 평균보다 보상이 큰 후보 쪽으로 가중치를 조금 옮긴다.</li>
 </ol>
-<p>그래서 이 학습은 맞히는 것과 함께 정직한 확률(<a href="#s4">4절</a> 보정)을 노린다. 단계별 그림은 <a href="#s5">5절</a> 그림 5-1에 있다. Laya의 공개 fine-tuning 코드는 이 RL 항에 soft cross-entropy(supervised learning loss)도 더한다<a class="cite" href="https://github.com/NandhaKishorM/laya" title="Laya GitHub (laya/train.py)">45</a>.</p>
-<p class="s6-rep"><b>대표 모델</b>: Laya.</p>
+<p>그래서 이 학습은 맞히는 것과 함께 정직한 확률(<a href="#s5">5절</a> 보정)을 노린다. 단계별 그림은 <a href="#s6">6절</a> 그림 6-1에 있다. Laya의 공개 fine-tuning 코드는 이 RL 항에 soft cross-entropy(supervised learning loss)도 더한다<a class="cite" href="https://github.com/NandhaKishorM/laya" title="Laya GitHub (laya/train.py)">45</a>.</p>
+<p class="s7-rep"><b>대표 모델</b>: Laya.</p>
 <details class="deep"><summary>깊이 보기: 계열 E의 세부와 한계</summary>
 <p>C는 후보 블록의 끝 토큰을 읽고, E는 보기마다 일부러 넣은 표시 토큰을 읽는다. Laya의 인코더는 <a href="https://huggingface.co/answerdotai/ModernBERT-large">ModernBERT-large</a>이고 decision head가 붙는다.<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></p>
-<ul class="s6-facts">
+<ul class="s7-facts">
 <li><b>forward pass</b>: 호출 하나에 배치 forward pass 1회다. 질문마다 입력이 하나씩 배치에 들어가므로, 시간은 질문 수에 따라 는다. T4에서 질문 1개는 39.5 ms, 10개는 158.6 ms다. <span class="tag t-self">자체 보고</span><a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></li>
 <li><b>학습하는 것</b>: 인코더 전체와 처음부터 학습한 decision head.<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></li>
 <li><b>다른 사례</b>: decider v10은 B의 문자 logit 위에 RL 단계를 더한 사례다.<a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/docs/RL.md" title="decider docs/RL.md">33</a></li>
 <li><b>저자가 밝힌 한계</b>: 보기들이 고정 토큰 예산을 나눠 쓴다. 보기가 77개면 라벨당 3-4 토큰만 남는다. 그래서 <a href="https://huggingface.co/datasets/PolyAI/banking77">Banking77</a> 정확도가 0.425(77 라벨)이고, Laya가 인용한 Jev 수치는 0.870(72 라벨)이다. <span class="tag t-self">자체 보고</span><a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></li>
 </ul></details>
 
-<h3 id="s3-f">F. text diffusion</h3>
+<h3 id="s4-f">F. text diffusion</h3>
 <p><dfn id="d-text-diffusion">text diffusion</dfn>은 글을 왼쪽부터 한 토큰씩 쓰지 않는다. 정해진 길이의 토큰 판 전체를 놓고 여러 번 고쳐 쓴다. 흐린 사진을 여러 번에 걸쳐 선명하게 만드는 것과 비슷하다<a class="cite" href="https://huggingface.co/google/diffusiongemma-26B-A4B-it" title="google/diffusiongemma-26B-A4B-it 카드">34</a>.</p>
 <ol>
 <li>답 JSON의 틀(괄호, 키)을 판에 고정한다.</li>
@@ -873,7 +935,7 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 <text x="300" y="99" font-size="12" class="f-muted">다시 쓰기</text>
 <text x="300" y="139" font-size="12" class="f-muted">허용 토큰</text>
 </svg>
-<figcaption><b>그림 3-2.</b> text diffusion으로 답 빈칸 채우기. 틀(<code>{"팀": "</code>, <code>"}</code>)은 고정이고 점선 칸만 바뀐다. 단계마다 판 전체를 동시에 다시 쓴다.</figcaption>
+<figcaption><b>그림 4-2.</b> text diffusion으로 답 빈칸 채우기. 틀(<code>{"팀": "</code>, <code>"}</code>)은 고정이고 점선 칸만 바뀐다. 단계마다 판 전체를 동시에 다시 쓴다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>시작: 빈칸을 무작위 토큰으로 채운다.</li>
@@ -883,10 +945,10 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 </details>
 </figure>
 <p>학습하지 않은 DiffusionGemma를 그대로 쓴다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a>.</p>
-<p class="s6-rep"><b>대표 모델</b>: open-jev(JoshuaSP), razorback16 openjev, LocalJev, DiffusionGemma-as-Jev vLLM 패치.<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a></p>
+<p class="s7-rep"><b>대표 모델</b>: open-jev(JoshuaSP), razorback16 openjev, LocalJev, DiffusionGemma-as-Jev vLLM 패치.<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a></p>
 <details class="deep"><summary>깊이 보기: 계열 F의 실제 예와 한계</summary>
 <p>open-jev의 세부 순서는 다음과 같다.<a class="cite" href="https://github.com/JoshuaSP/open-jev" title="JoshuaSP/open-jev README">20</a></p>
-<ul class="s6-facts">
+<ul class="s7-facts">
 <li><b>빈칸</b>: 어휘 전체에서 무작위로 뽑은 토큰으로 채우고, 디노이징 동안에는 제약이 없다.</li>
 <li><b>여러 토큰짜리 보기</b>: 처음 갈라지는 토큰으로 구분한다. 고른 JSON 문서는 마지막에 검증한다.</li>
 <li><b>단계 수</b>: N은 호출 인자이고, README의 공개 질문 결과는 1단계와 2단계다.</li>
@@ -913,7 +975,7 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 {"department": "billing", "refund_requested": true}</code></pre></aside>
 </details>
 
-<h3 id="s3-h">어느 계열이 많은가</h3>
+<h3 id="s4-h">어느 계열이 많은가</h3>
 <p class="lead">학습한 모델이 학습 없는 기법보다 많다.</p>
 <p>이 그림은 트래커 항목 67개를 종류별로 센 값을 보여 준다.</p>
 <figure id="fig-s6-3">
@@ -930,7 +992,7 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 <rect x="130" y="110" width="122.7" height="30" rx="4" class="f-muted"><title>그 밖 15개</title></rect>
 <text x="262" y="131" font-size="16" font-weight="700">15</text>
 </svg>
-<figcaption><b>그림 3-3.</b> <a class="term" href="#g-decision-index">Decision Index</a> 트래커(news.html)의 항목 67개를 종류별로 센 값(2026-10-09 조회).<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a> Trained는 이 문서의 B부터 E, Decoding은 A에 해당한다. "그 밖"은 설명 글 9, Diffusion(이 문서의 F) 4, Prior art 2다.</figcaption>
+<figcaption><b>그림 4-3.</b> <a class="term" href="#g-decision-index">Decision Index</a> 트래커(news.html)의 항목 67개를 종류별로 센 값(2026-10-09 조회).<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a> Trained는 이 문서의 B부터 E, Decoding은 A에 해당한다. "그 밖"은 설명 글 9, Diffusion(이 문서의 F) 4, Prior art 2다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>가로 막대 세 개, 길이는 항목 수에 비례한다.</li>
@@ -968,24 +1030,24 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 </ul></details>
 </section>
 
-<section id="s4">
+<section id="s5">
 <style>
-#s4 #fig-s4-dots svg, #s4 #fig-s4-auto svg, #s4 #fig-s4-temp svg, #s4 #fig-s7-1 svg { max-width: 32rem; display: block; margin-inline: auto; }
-#s4 .rel-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin: 0.75rem 0 0.5rem; }
-#s4 .rel-controls[hidden] { display: none; }
-#s4 .rel-slider { display: flex; align-items: center; gap: 0.5rem; flex: 1 1 16rem; min-width: 0; }
-#s4 .rel-slider label { font-weight: 700; white-space: nowrap; }
-#s4 .rel-slider input[type="range"] { flex: 1 1 auto; min-width: 8rem; accent-color: var(--accent); }
-#s4 .rel-slider output { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; min-width: 3.2rem; }
-#s4 .rel-presets { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-#s4 .btn[aria-pressed="true"] { background: var(--accent-weak); }
-#s4 .rel-stats { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin: 0.5rem 0 0; font-variant-numeric: tabular-nums; }
-#s4 .rel-stats b { font-family: var(--mono); }
-#s4 .rel-bar { transition: y 0.2s, height 0.2s; }
-#s4 .rel-mean { transition: y1 0.2s, y2 0.2s; }
-@media (prefers-reduced-motion: reduce) { #s4 .rel-bar, #s4 .rel-mean { transition: none; } }
+#s5 #fig-s4-dots svg, #s5 #fig-s4-auto svg, #s5 #fig-s4-temp svg, #s5 #fig-s7-1 svg { max-width: 32rem; display: block; margin-inline: auto; }
+#s5 .rel-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin: 0.75rem 0 0.5rem; }
+#s5 .rel-controls[hidden] { display: none; }
+#s5 .rel-slider { display: flex; align-items: center; gap: 0.5rem; flex: 1 1 16rem; min-width: 0; }
+#s5 .rel-slider label { font-weight: 700; white-space: nowrap; }
+#s5 .rel-slider input[type="range"] { flex: 1 1 auto; min-width: 8rem; accent-color: var(--accent); }
+#s5 .rel-slider output { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; min-width: 3.2rem; }
+#s5 .rel-presets { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+#s5 .btn[aria-pressed="true"] { background: var(--accent-weak); }
+#s5 .rel-stats { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin: 0.5rem 0 0; font-variant-numeric: tabular-nums; }
+#s5 .rel-stats b { font-family: var(--mono); }
+#s5 .rel-bar { transition: y 0.2s, height 0.2s; }
+#s5 .rel-mean { transition: y1 0.2s, y2 0.2s; }
+@media (prefers-reduced-motion: reduce) { #s5 .rel-bar, #s5 .rel-mean { transition: none; } }
 </style>
-<h2>4. 보정</h2>
+<h2>5. 보정</h2>
 <p class="lead">모델이 "80% 확신"이라고 한 답이 실제로 80% 맞으면, 그 모델은 <dfn id="d-calibration">보정</dfn>되어 있다.</p>
 <figure id="fig-s4-dots">
 <svg viewBox="0 0 480 296" role="img" aria-labelledby="fig-s4-dots-t">
@@ -1199,7 +1261,7 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 <circle cx="22" cy="284" r="6" class="f-accent"/><text x="34" y="289" font-size="13" class="f-muted">맞음</text>
 <circle cx="86" cy="284" r="5.5" class="f-none s-muted" stroke-width="1.5"/><text x="98" y="289" font-size="13" class="f-muted">틀림</text>
 </svg>
-<figcaption><b>그림 4-1.</b> 같은 "80% 확신", 다른 결과.</figcaption>
+<figcaption><b>그림 5-1.</b> 같은 "80% 확신", 다른 결과.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>모델 A: "80% 확신"이라고 한 답 100개 중 80개가 맞는다. 말한 확률과 실제가 같으므로 보정되어 있다.</li>
@@ -1208,7 +1270,7 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 </details>
 </figure>
 <p>보정은 답 하나가 아니라 답 묶음의 성질이다. "80% 확신" 답 하나가 맞는지는 보장하지 않는다<a class="cite" href="https://docs.typesafe.ai/introduction/machine-learning-primer" title="TypeSafe machine learning primer">24</a>.</p>
-<p>보정을 숫자 하나로 잰 것이 <a class="term" href="#g-ece">ECE</a>(expected calibration error)다. 확률 구간마다 "말한 확률"과 "실제 정답률"의 차이를 구하고, 구간의 답 수로 가중 평균한다. 0이면 완벽하다. 그림 4-1의 모델 B는 답이 모두 80% 구간에 있으므로 ECE가 0.8 − 0.6 = 0.2이고, 모델 A는 0이다. 계산식과 예는 아래 상자에 있다.</p>
+<p>보정을 숫자 하나로 잰 것이 <a class="term" href="#g-ece">ECE</a>(expected calibration error)다. 확률 구간마다 "말한 확률"과 "실제 정답률"의 차이를 구하고, 구간의 답 수로 가중 평균한다. 0이면 완벽하다. 그림 5-1의 모델 B는 답이 모두 80% 구간에 있으므로 ECE가 0.8 − 0.6 = 0.2이고, 모델 A는 0이다. 계산식과 예는 아래 상자에 있다.</p>
 <details class="deep"><summary>깊이 보기: 보정을 재는 수, ECE와 Brier 점수</summary>
 <p><dfn id="d-ece">ECE</dfn>(expected calibration error)는 보정 오차를 한 수로 줄인 값이다. 0이면 완벽하다. 계산은 세 단계다.</p>
 <ol>
@@ -1219,7 +1281,7 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 <p>예를 들어 평균 확률 0.9인 구간에 답 50개가 있고 정답률이 0.7이라고 하자. 평균 확률 0.6인 다른 구간에도 답 50개가 있고 정답률이 0.6이다. ECE는 0.5×0.2 + 0.5×0 = 0.1이다.</p>
 <p><dfn id="d-brier">Brier 점수</dfn>는 답마다 확률과 실제 결과(맞으면 1, 틀리면 0)의 차이를 제곱해 평균한 값이다. 낮을수록 좋다. yes에 0.8을 주고 yes가 맞으면 (1−0.8)² = 0.04이고, no가 맞으면 0.8² = 0.64다. ECE와 달리 Brier 점수는 정확도와 보정을 함께 반영한다.</p>
 <pre><code>ECE   = Σ_b (n_b / N) × | acc_b − conf_b |
-        b: 확률 구간 (그림 4-4는 폭 0.1인 구간 10개)
+        b: 확률 구간 (그림 5-4는 폭 0.1인 구간 10개)
         n_b: 구간 b의 답 수, N: 전체 답 수
         acc_b: 구간 b에서 실제로 맞은 비율 (그림에서는 실제 yes 비율)
         conf_b: 구간 b의 평균 확률
@@ -1231,13 +1293,13 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 온도   p = softmax(z / T)
         yes/no 하나의 logit z이면 p(yes) = 1 / (1 + exp(−z / T))</code></pre>
 </details>
-<details class="deep" id="s4-4"><summary>숫자 더 보기: 두 리더보드가 보정을 재는 방식</summary>
-<p><a class="term" href="#g-jevbench">JevBench</a>는 보정을 점수에 넣고, Decision Index는 보정을 따로 보고한다. JevBench에서 Capability는 Intelligence와 Calibration의 평균이다<a class="cite" href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md" title="JevBench 방법 문서 (METHOD-v1.5)">66</a>. 질문 타입별 보정 지표는 <a href="#s7-1">7절</a>에 있다.</p>
-<p><a class="term" href="#g-decision-index">Decision Index</a> 0.3은 보정을 점수에 넣지 않고 ECE와 Brier 점수를 따로 보고한다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 데이터 (index.json)">41</a>. 이 판에서 Jev는 ECE 0.074, Brier 점수 0.3558이다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 데이터 (index.json)">41</a>. 두 리더보드의 비교는 <a href="#s7">7절</a>에 있다.</p>
-<p>Decision Index의 ECE는 모델이 고른 답에 둔 최고 확률과 실제 정답률의 차이를 확률 구간마다 재서 가중 평균한 값이다. 32개 벤치마크에서 Jev는 정확도 0.7393, 평균 최고 확률 0.8115이고 ECE는 0.074다. 두 평균의 차(0.072)와 조금 다른 것은 구간마다 재기 때문이다. 공개 가중치 모델 Jebadiah 27B는 0.014, Kev 27B는 0.0218이다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 데이터 (index.json)">41</a>. 트래커의 보정 문장과 이 수치의 관계는 <a href="#s6-4b">6절 상자</a>에 있다.</p>
+<details class="deep" id="s5-4"><summary>숫자 더 보기: 두 리더보드가 보정을 재는 방식</summary>
+<p><a class="term" href="#g-jevbench">JevBench</a>는 보정을 점수에 넣고, Decision Index는 보정을 따로 보고한다. JevBench에서 Capability는 Intelligence와 Calibration의 평균이다<a class="cite" href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md" title="JevBench 방법 문서 (METHOD-v1.5)">66</a>. 질문 타입별 보정 지표는 <a href="#s8-1">8절</a>에 있다.</p>
+<p><a class="term" href="#g-decision-index">Decision Index</a> 0.3은 보정을 점수에 넣지 않고 ECE와 Brier 점수를 따로 보고한다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 데이터 (index.json)">41</a>. 이 판에서 Jev는 ECE 0.074, Brier 점수 0.3558이다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 데이터 (index.json)">41</a>. 두 리더보드의 비교는 <a href="#s8">8절</a>에 있다.</p>
+<p>Decision Index의 ECE는 모델이 고른 답에 둔 최고 확률과 실제 정답률의 차이를 확률 구간마다 재서 가중 평균한 값이다. 32개 벤치마크에서 Jev는 정확도 0.7393, 평균 최고 확률 0.8115이고 ECE는 0.074다. 두 평균의 차(0.072)와 조금 다른 것은 구간마다 재기 때문이다. 공개 가중치 모델 Jebadiah 27B는 0.014, Kev 27B는 0.0218이다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 데이터 (index.json)">41</a>. 트래커의 보정 문장과 이 수치의 관계는 <a href="#s7-4b">7절 상자</a>에 있다.</p>
 </details>
 
-<h3 id="s4-2">왜 결정 모델에서 더 중요한가</h3>
+<h3 id="s5-2">왜 결정 모델에서 더 중요한가</h3>
 <p class="lead">결정 모델의 확률은 사람보다 프로그램이 먼저 보고 행동한다. 예를 들어 "확신 90% 이상이면 자동 환불"처럼 쓴다.</p>
 <figure id="fig-s4-auto">
 <svg viewBox="0 0 480 200" role="img" aria-labelledby="fig-s4-auto-t">
@@ -1252,7 +1314,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <rect x="396.8" y="140" width="67.2" height="26" class="f-fg"/>
 <text x="464" y="186" font-size="14" text-anchor="end">틀린 자동 처리 120건</text>
 </svg>
-<figcaption><b>그림 4-2.</b> 과신의 비용. 오른쪽 끝 칸이 틀린 자동 처리다. 사람은 이 800건을 보지 않는다.</figcaption>
+<figcaption><b>그림 5-2.</b> 과신의 비용. 오른쪽 끝 칸이 틀린 자동 처리다. 사람은 이 800건을 보지 않는다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>결정 1,000건 중 확신 90% 이상인 800건을 사람 확인 없이 자동 처리한다.</li>
@@ -1268,7 +1330,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <blockquote lang="en"><p>Higher probability should correspond to a greater chance that the answer is correct.</p><footer><a class="cite" href="https://docs.typesafe.ai/introduction/machine-learning-primer" title="TypeSafe machine learning primer">24</a></footer></blockquote>
 </details>
 
-<h3 id="s4-3">온도: 확신의 크기를 조절하는 다이얼</h3>
+<h3 id="s5-3">온도: 확신의 크기를 조절하는 다이얼</h3>
 <p class="lead"><dfn id="d-temperature">온도</dfn> T는 확률을 만들기 전에 점수(logit)를 나누는 수다. 답의 순위는 그대로 두고 확신의 크기만 바꾼다.</p>
 <figure id="fig-s4-temp">
 <svg viewBox="0 0 480 176" role="img" aria-labelledby="fig-s4-temp-t">
@@ -1288,7 +1350,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <text x="404" y="124" font-size="14" font-weight="700">yes 68%</text>
 <text x="16" y="164" font-size="14">세 경우 모두 yes가 1등이다. 확신의 크기만 바뀐다</text>
 </svg>
-<figcaption><b>그림 4-3.</b> 온도는 확신의 다이얼이다. 왼쪽 막대가 yes 확률이다. 점수는 그림 1-1의 값이다.</figcaption>
+<figcaption><b>그림 5-3.</b> 온도는 확신의 다이얼이다. 왼쪽 막대가 yes 확률이다. 점수는 그림 1-1의 값이다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>T=0.5: yes 95%. 확신이 커진다.</li>
@@ -1302,16 +1364,16 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <ul>
 <li><b>모델은 흔히 과신한다.</b> Hopper는 Banking77에서 평균 확신 0.78, 정확도 0.67이었다<a class="cite" href="https://huggingface.co/HopitAI/hopper" title="HopitAI/hopper 모델 카드">15</a><span class="tag t-self">자체 보고</span>. T를 1보다 크게 잡으면 확신이 줄어 실제 정답률에 맞춰진다.</li>
 <li><b>싸고 안전하다.</b> 다시 학습하지 않고 숫자 하나만 정한다. 모든 logit을 같은 수로 나누므로 1등 답과 정확도는 그대로다.</li>
-<li><b>결정 모델에 필요하다.</b> "확신 90% 이상이면 자동 처리" 같은 규칙은 확률값 자체를 믿고 움직인다(그림 4-2).</li>
+<li><b>결정 모델에 필요하다.</b> "확신 90% 이상이면 자동 처리" 같은 규칙은 확률값 자체를 믿고 움직인다(그림 5-2).</li>
 </ul>
-<p>주의할 점이 둘 있다. 이 온도는 글의 다양성을 정하는 샘플링 온도와 이름만 같다<a class="cite" href="https://huggingface.co/internlm/Intern-Decision-4B" title="internlm/Intern-Decision-4B 카드">27</a>. 또 확률이 임계값을 넘는지로 채점하면 온도가 결과를 바꾼다. <a href="#s7">7절</a>의 Noul 기권 규칙(yes 확률 0.20 초과 0.80 미만이면 기권)이 그런 채점이다.</p>
+<p>주의할 점이 둘 있다. 이 온도는 글의 다양성을 정하는 샘플링 온도와 이름만 같다<a class="cite" href="https://huggingface.co/internlm/Intern-Decision-4B" title="internlm/Intern-Decision-4B 카드">27</a>. 또 확률이 임계값을 넘는지로 채점하면 온도가 결과를 바꾼다. <a href="#s8">8절</a>의 Noul 기권 규칙(yes 확률 0.20 초과 0.80 미만이면 기권)이 그런 채점이다.</p>
 <p>아래 그림에서 온도를 직접 바꿔 본다. 데이터는 지어낸 yes/no 결정 400개다. 막대 끝이 점선(완벽한 보정)에 닿을수록 보정이 잘 된 것이다.</p>
 <figure id="fig-s7-1">
 <div class="rel-controls" hidden>
   <div class="rel-slider">
-    <label for="s4-temp">온도 T</label>
-    <input type="range" id="s4-temp" min="0.5" max="3" step="0.05" value="1" aria-describedby="s4-stats">
-    <output id="s4-temp-out" for="s4-temp">1.00</output>
+    <label for="s5-temp">온도 T</label>
+    <input type="range" id="s5-temp" min="0.5" max="3" step="0.05" value="1" aria-describedby="s5-stats">
+    <output id="s5-temp-out" for="s5-temp">1.00</output>
   </div>
   <div class="rel-presets" role="group" aria-label="온도 바로 가기">
     <button type="button" class="btn" data-t="0.6" aria-pressed="false">과신 T=0.60</button>
@@ -1378,13 +1440,13 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <text x="26" y="220" font-size="26" text-anchor="middle" transform="rotate(-90 26 220)">실제 yes 비율</text>
 <text x="42" y="468" font-size="26" text-anchor="middle" class="f-muted">답 수</text>
 </svg>
-<p class="rel-stats" id="s4-stats" aria-live="polite">
+<p class="rel-stats" id="s5-stats" aria-live="polite">
   <span>T = <b class="rel-o-t">1.00</b></span>
   <span>ECE <b class="rel-o-ece">0.078</b></span>
   <span>Brier 점수 <b class="rel-o-brier">0.164</b></span>
   <span>정확도 <b class="rel-o-acc">77.5%</b></span>
 </p>
-<figcaption><b>그림 4-4.</b> 온도에 따른 신뢰도 그림. 막대는 구간별 실제 yes 비율, 막대 위 짧은 가로선은 구간의 평균 확률, 점선은 완벽한 보정, 아래 숫자는 구간의 답 수다. 데이터 400개와 모든 수치는 설명용 예시다. 자바스크립트가 없으면 T=1.00 상태를 보인다.</figcaption>
+<figcaption><b>그림 5-4.</b> 온도에 따른 신뢰도 그림. 막대는 구간별 실제 yes 비율, 막대 위 짧은 가로선은 구간의 평균 확률, 점선은 완벽한 보정, 아래 숫자는 구간의 답 수다. 데이터 400개와 모든 수치는 설명용 예시다. 자바스크립트가 없으면 T=1.00 상태를 보인다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>가로축: 모델이 준 yes 확률을 폭 0.1인 구간 10개로 나눈 것. 세로축: 그 구간에서 실제로 yes였던 비율.</li>
@@ -1420,7 +1482,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <p>그래서 막대 하나보다 전체 흐름과 ECE를 본다. 데이터가 많을수록 막대는 매끄러워진다.</p>
 <details class="deep"><summary>숫자 더 보기: 대표 온도 세 가지와 온도의 계산</summary>
 <div class="table-wrap"><table>
-<caption>대표 온도 세 가지의 값 (설명용 예시, 그림 4-4와 같은 데이터)</caption>
+<caption>대표 온도 세 가지의 값 (설명용 예시, 그림 5-4와 같은 데이터)</caption>
 <thead><tr><th>상태</th><th>T</th><th>ECE</th><th>Brier 점수</th><th>정확도</th></tr></thead>
 <tbody>
 <tr><td>과신</td><td class="num">0.60</td><td class="num">0.127</td><td class="num">0.177</td><td class="num">77.5%</td></tr>
@@ -1430,14 +1492,14 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <p>yes/no 질문에서는 yes logit에서 no logit을 뺀 값을 z라 하고, z를 T로 나눈다. T가 1보다 크면 확률이 0.5 쪽으로 퍼지고, 1보다 작으면 0이나 1 쪽으로 몰린다.</p>
 </details>
 
-<h3 id="s4-5">어떻게 맞추나</h3>
+<h3 id="s5-5">어떻게 맞추나</h3>
 <p class="lead">대부분은 학습이 끝난 뒤 temperature scaling으로 온도 하나를 맞춘다. 일부는 학습할 때부터 보정을 보상에 넣는다.</p>
 <div class="table-wrap"><table>
 <caption>보정을 맞추는 두 방법 (모두 자체 보고)</caption>
 <thead><tr><th>방법</th><th>하는 일</th><th>예</th></tr></thead>
 <tbody>
 <tr><td>temperature scaling</td><td>학습 뒤, 따로 둔 사례로 온도 T 하나를 골라 고정한다.</td><td>Intern-Decision-4B (T=1.992)<a class="cite" href="https://huggingface.co/internlm/Intern-Decision-4B" title="internlm/Intern-Decision-4B 카드">27</a></td></tr>
-<tr><td>학습 때 보상</td><td><dfn id="d-proper-scoring">proper scoring rule</dfn>(믿는 확률을 그대로 말할 때 점수가 가장 좋은 채점)을 보상이나 <a class="term" href="#g-loss">loss</a>로 쓴다(<a href="#s5">5절</a>).</td><td>Laya<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a>, JPT<a class="cite" href="https://huggingface.co/kirp/jpt-4b" title="JPT 모델 카드">37</a></td></tr>
+<tr><td>학습 때 보상</td><td><dfn id="d-proper-scoring">proper scoring rule</dfn>(믿는 확률을 그대로 말할 때 점수가 가장 좋은 채점)을 보상이나 <a class="term" href="#g-loss">loss</a>로 쓴다(<a href="#s6">6절</a>).</td><td>Laya<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a>, JPT<a class="cite" href="https://huggingface.co/kirp/jpt-4b" title="JPT 모델 카드">37</a></td></tr>
 </tbody></table></div>
 <details class="deep"><summary>깊이 보기: proper scoring rule의 예</summary>
 <p>Brier 점수와 로그 점수가 대표적이다. 실제 확률이 0.7인 사건에 0.7이라고 답하면 기대 Brier 점수는 0.21이다. 1.0이라고 과장하면 0.30으로 나빠진다.</p>
@@ -1452,7 +1514,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <tr><td>보기 수에 따라 달라지는 온도</td><td>decider-chat (보기가 n개일 때 T(n))</td><td><a class="cite" href="https://github.com/Mapika/decider" title="Mapika/decider README">13</a></td></tr>
 <tr><td>구간별(per-bucket) 온도</td><td>lev (질문 타입, 읽기 방식, 보기 수 구간마다 온도 하나)</td><td><a class="cite" href="https://huggingface.co/interfaze-ai/lev" title="interfaze-ai/lev 모델 카드">5</a></td></tr>
 <tr><td>학습 loss에 Brier 항</td><td>JPT (다중 클래스 Brier), heman10x ModernBERT-151M (CE + 1.0×Brier, 뒤에 온도 1.0716). CE(cross-entropy)는 정답에 준 확률의 로그를 음수로 한 loss다.</td><td><a class="cite" href="https://huggingface.co/kirp/jpt-4b" title="JPT 모델 카드">37</a><a class="cite" href="https://huggingface.co/heman10x/rlcd-modernbert-151m" title="heman10x ModernBERT-151M 카드">40</a></td></tr>
-<tr><td>proper scoring rule 보상 (<a href="#s5">5절</a>)</td><td>Laya (log + spherical 점수, 순서 질문에 RPS, 순서 있는 단계의 누적 확률 오차), decider v10 (belief 질문에 log 점수)</td><td><a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a><a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/docs/RL.md" title="decider docs/RL.md">33</a></td></tr>
+<tr><td>proper scoring rule 보상 (<a href="#s6">6절</a>)</td><td>Laya (log + spherical 점수, 순서 질문에 RPS, 순서 있는 단계의 누적 확률 오차), decider v10 (belief 질문에 log 점수)</td><td><a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a><a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/docs/RL.md" title="decider docs/RL.md">33</a></td></tr>
 </tbody></table></div>
 <p>decider 학습 코드(<code>train.py</code>)에는 Brier 항의 가중치 보기 <code>brier_w</code>가 있고 기본값은 0.0이다. 공개 모델이 이 항으로 학습됐는지는 확인되지 않았다<span class="tag t-unverified">미확인</span><a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/decider/train.py" title="decider train.py">39</a>.</p>
 <p>Hopper 카드는 온도가 <q lang="en">never changes the top answer</q>라고 적는다<a class="cite" href="https://huggingface.co/HopitAI/hopper" title="HopitAI/hopper 모델 카드">15</a><span class="tag t-self">자체 보고</span>. Kev 카드는 배포한 온도를 학습 코퍼스의 보류 항목에 맞췄다고 쓰고, Kev 저자의 릴리스 규칙이 이 방식을 새 릴리스에서 허용하지 않는다고 밝힌다<a class="cite" href="https://huggingface.co/jaredpalmer/kev-4b" title="jaredpalmer/kev-4b 모델 카드">22</a><span class="tag t-self">자체 보고</span>.</p>
@@ -1481,7 +1543,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <script>
 (function () {
   'use strict';
-  var root = document.getElementById('s4');
+  var root = document.getElementById('s5');
   if (!root) return;
   var fig = root.querySelector('#fig-s7-1');
   var Z = [1.73,-0.46,0.4,3.05,2.06,3.47,0.55,-2.47,-0.77,0.35,1.44,-1.55,-3.55,0.24,-1.05,5.52,2.68,-0.34,-2.55,2.34,3.73,3.69,-2.47,-1.38,-2.11,1.13,-4.26,-0.63,-1.22,-1.99,-5.36,-4.97,-1.23,-5.32,-3.43,4.2,-0.74,-4.78,-4.57,0.79,0.69,-2.89,0.68,-4.96,-0.79,-6.04,5.92,0.12,-6.22,7.38,-1.99,-4.07,0.28,3.33,0.26,-1.48,1.15,-2.26,-0.85,-0.22,2.97,-0.84,-4.06,-5.03,-6.33,1.68,2.56,0.84,-1.42,-0.02,-1.9,-4.11,2.98,2.01,-3.38,1,-2.68,-1.44,0.57,-5.43,-1.92,-1.59,-6.93,5.56,1.3,-0.62,0.56,-2.8,-1.76,-0.78,-0.98,5.35,1.67,-0.07,-3.52,-0.4,5.21,-7.3,0.78,1.56,1.85,-8.34,1.08,4.32,-3.7,-0.34,-1.95,-3.38,-2.44,-4.17,0.77,-2.8,-3.7,-1.73,-6.95,-5.88,-2.69,-0.24,2.66,-2.16,1.22,3.26,-1.82,-3.23,-5.35,3.18,3.32,3.04,-0.9,2.04,-3.7,4.03,3.26,-2.2,5.33,-1,-1.91,-1.28,6.61,1.38,-4.69,-2.95,0.56,-5.28,-2.75,-3.81,0.25,2.52,-0.44,4.19,-7.95,-3.46,-2.22,-1.86,-1.14,-0.71,-0.23,-4.71,-0.85,-0.54,3.87,-1.7,-0.62,-2.08,-1.05,1.28,4.04,2.51,-1.62,1.29,-2.4,2.61,-0.16,2.93,-2.14,4.22,-3.2,2.7,1.35,-4.89,4.78,2.5,2.09,-4.66,1.39,4.47,3.44,-0.97,1.33,-5.76,-2.63,-0.42,0.02,-2.04,1.39,-3.29,-1.39,-5.72,-2.21,-3.93,-2.36,0.14,-2.62,0.74,-0.13,1.84,1.47,-2.89,-1.17,-2.24,0.53,3.87,-0.13,-2.04,4.31,0.59,-2.08,2.22,-0.98,-5.14,1.72,-4.82,1.23,-3.47,-0.77,-0.95,-0.11,-0.91,-1.25,0.4,-7.32,-4.94,-3.46,1.3,5.27,0.21,-3.05,1.63,-1.54,1.8,1.93,-5.34,2.72,1.9,1.51,5.74,4.88,0.67,-0.29,6.33,-0.3,1.69,3.61,3.19,1.85,1.88,-1.87,-0.8,1.63,-2.59,1.67,3.53,0.26,1.08,2.21,-1.59,-5.5,-5.77,4.5,3.6,-2.02,1.01,-1.26,0.31,4.36,-4.11,-2.87,-2.22,-4.6,-3.38,-1.13,1.22,-2.3,-0.88,2.51,-2.16,-1.78,-1.64,0.71,-1.24,-2.8,-3.96,-2.04,-2.19,2.25,0.41,-1.98,-4.96,0.86,-2.63,-2.24,-1.31,-0.64,-4.45,-0.21,3.11,6.51,-0.48,-1.2,0.76,-3.22,3.94,0.43,2.63,-0.61,3.39,-0.71,0.05,2.06,0.68,-2.47,-1.4,-3.56,-0.74,-1.63,2.85,2.02,2.18,-0.94,-4.22,-0.58,-2.94,2.06,-3.14,-3.77,-2.46,-4.08,-4.5,0.31,-1.62,1.54,-1.97,-2.2,-1.84,1.38,-3.85,-4.94,1.04,1.82,0.41,0.09,-3.48,-2.7,-0.01,1.95,-0.32,2.72,-0.11,1.35,-0.75,2.07,-2,1.15,3.04,-1.05,1.87,1.07,4.58,3.79,-5.09,-6.68,1.08,-5.04,0.84,-0.08,2.32,0.11,3.43,-3.48,-4.03,-0.68,-2.58,1.52,-0.71,1.94,-0.29,4.14,-0.71,0.15,1.31,-2.29,-3.68,5.76,5.21,-0.32,-1.12,-2.24,-0.74,3.66,4.76];
@@ -1509,8 +1571,8 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
     if (e < bestE) { bestE = e; best = t; }
   }
 
-  var slider = fig.querySelector('#s4-temp');
-  var out = fig.querySelector('#s4-temp-out');
+  var slider = fig.querySelector('#s5-temp');
+  var out = fig.querySelector('#s5-temp-out');
   var buttons = fig.querySelectorAll('.rel-presets .btn');
   var bestBtn = fig.querySelector('.rel-best');
   bestBtn.setAttribute('data-t', String(best));
@@ -1565,9 +1627,9 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 </script>
 </section>
 
-<section id="s5"><h2>5. 학습 방법</h2>
+<section id="s6"><h2>6. 학습 방법</h2>
 <style>
-#s5 figure svg { max-width: 32rem; display: block; margin-inline: auto; }
+#s6 figure svg { max-width: 32rem; display: block; margin-inline: auto; }
 </style>
 <p class="lead">결정 모델을 가르치는 방법은 둘이다. 정답을 알려 주는 <a class="term" href="#g-supervised">supervised learning</a>과, 점수만 매겨 주는 <dfn id="d-rl">RL</dfn>(reinforcement learning)이다. 공개 결정 모델은 대부분 정답을 알려 주는 쪽이다.</p>
 
@@ -1583,15 +1645,15 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <figure id="fig-s8-1">
 <svg viewBox="0 0 480 816" role="img" aria-labelledby="fig-s8-1-t">
 <title id="fig-s8-1-t">supervised learning은 forward pass 한 번의 허용 토큰 확률을 정답 라벨과 cross-entropy로 비교한다. RL은 잡음 섞인 후보 분포 셋을 점수 규칙으로 채점하고 평균보다 나은 후보 쪽으로 움직인다.</title>
-<defs><marker id="s5-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted"/></marker></defs>
+<defs><marker id="s6-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted"/></marker></defs>
 <text x="16" y="24" font-size="17" font-weight="700">A. supervised learning: 정답을 직접 준다</text>
 <rect x="16" y="40" width="448" height="64" rx="8" class="f-surface s-fg" stroke-width="1.5"/>
 <text x="32" y="66" font-size="16" font-weight="700">1. 프롬프트 = 상태 + 질문 "환불을 원하나요?"</text>
 <text x="32" y="92" font-size="15">상태: "2주째 배송이 안 왔어요. 환불해 주세요."</text>
-<line x1="240" y1="104" x2="240" y2="128" class="s-muted" stroke-width="2" marker-end="url(#s5-arr)"/>
+<line x1="240" y1="104" x2="240" y2="128" class="s-muted" stroke-width="2" marker-end="url(#s6-arr)"/>
 <rect x="16" y="132" width="448" height="44" rx="8" class="f-surface s-fg" stroke-width="1.5"/>
 <text x="32" y="160" font-size="16" font-weight="700">2. forward pass 1회</text>
-<line x1="240" y1="176" x2="240" y2="200" class="s-muted" stroke-width="2" marker-end="url(#s5-arr)"/>
+<line x1="240" y1="176" x2="240" y2="200" class="s-muted" stroke-width="2" marker-end="url(#s6-arr)"/>
 <rect x="16" y="204" width="448" height="96" rx="8" class="f-surface s-fg" stroke-width="1.5"/>
 <text x="32" y="228" font-size="16" font-weight="700">3. 허용 토큰 logit → 확률</text>
 <text x="32" y="256" font-size="15">yes</text>
@@ -1600,7 +1662,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <text x="32" y="284" font-size="15">no</text>
 <rect x="80" y="270" width="56" height="18" class="f-muted"/>
 <text x="144" y="284" font-size="15">0.2</text>
-<line x1="240" y1="300" x2="240" y2="324" class="s-muted" stroke-width="2" marker-end="url(#s5-arr)"/>
+<line x1="240" y1="300" x2="240" y2="324" class="s-muted" stroke-width="2" marker-end="url(#s6-arr)"/>
 <rect x="16" y="328" width="448" height="68" rx="8" class="f-accent-weak s-accent" stroke-width="1.5"/>
 <text x="32" y="354" font-size="16" font-weight="700">4. 정답 라벨 yes와 cross-entropy</text>
 <text x="32" y="382" font-size="15">loss = −log 0.8 ≈ 0.22, 이 값을 줄인다</text>
@@ -1609,7 +1671,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <rect x="16" y="456" width="448" height="64" rx="8" class="f-surface s-fg" stroke-width="1.5"/>
 <text x="32" y="482" font-size="16" font-weight="700">1. 같은 프롬프트의 logit을 얻는다</text>
 <text x="32" y="508" font-size="15">logit에 잡음을 더해 후보 분포 3개를 만든다</text>
-<line x1="240" y1="520" x2="240" y2="544" class="s-muted" stroke-width="2" marker-end="url(#s5-arr)"/>
+<line x1="240" y1="520" x2="240" y2="544" class="s-muted" stroke-width="2" marker-end="url(#s6-arr)"/>
 <rect x="16" y="548" width="448" height="160" rx="8" class="f-surface s-fg" stroke-width="1.5"/>
 <text x="32" y="574" font-size="16" font-weight="700">2. 점수 규칙으로 채점 (실제 결과 yes)</text>
 <rect x="24" y="586" width="432" height="28" rx="4" class="f-accent-weak s-accent" stroke-width="1.5"/>
@@ -1619,12 +1681,12 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <rect x="24" y="650" width="432" height="28" rx="4" class="f-accent-weak s-accent" stroke-width="1.5"/>
 <text x="32" y="670" font-size="15">후보 3</text><text x="96" y="670" font-size="15">yes 0.75</text><text x="186" y="670" font-size="15">보상 −0.29</text><text x="300" y="670" font-size="15" font-weight="700">평균 위</text>
 <text x="32" y="698" font-size="15">보상 = log(yes에 준 확률), 평균 −0.30</text>
-<line x1="240" y1="708" x2="240" y2="732" class="s-muted" stroke-width="2" marker-end="url(#s5-arr)"/>
+<line x1="240" y1="708" x2="240" y2="732" class="s-muted" stroke-width="2" marker-end="url(#s6-arr)"/>
 <rect x="16" y="736" width="448" height="68" rx="8" class="f-accent-weak s-accent" stroke-width="1.5"/>
 <text x="32" y="762" font-size="16" font-weight="700">3. 평균보다 나은 후보 1, 3 쪽으로</text>
 <text x="32" y="788" font-size="15">가중치를 옮긴다</text>
 </svg>
-<figcaption><b>그림 5-1.</b> 예시 Noul 질문으로 본 두 학습 경로. A의 단계는 아래 레시피 상자, B의 단계는 Laya 모델 카드를 따른다.<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></figcaption>
+<figcaption><b>그림 6-1.</b> 예시 Noul 질문으로 본 두 학습 경로. A의 단계는 아래 레시피 상자, B의 단계는 Laya 모델 카드를 따른다.<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a></figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>A. supervised learning: 프롬프트(고객 메일 "2주째 배송이 안 왔어요. 환불해 주세요." + Noul 질문 "고객이 환불을 원하나요?") → forward pass 1회 → 허용 토큰 logit의 확률 yes 0.8, no 0.2 → 정답 라벨 yes와 cross-entropy, loss −log 0.8 ≈ 0.22를 줄인다.</li>
@@ -1635,10 +1697,10 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 </details>
 </figure>
 
-<p>Laya의 RL 보상은 <a class="term" href="#g-proper-scoring">proper scoring rule</a>이다. 믿는 확률을 그대로 말할 때 기대 보상이 가장 크므로, 맞히기와 함께 보정된 확률(<a href="#s4">4절</a>)을 직접 노린다. decider v10은 과제의 성공과 실패를 보상으로 쓰고, 다음 일의 확률을 답하는 belief 항에만 proper scoring rule을 쓴다(<a href="#s5-4">아래 상자</a>).</p>
+<p>Laya의 RL 보상은 <a class="term" href="#g-proper-scoring">proper scoring rule</a>이다. 믿는 확률을 그대로 말할 때 기대 보상이 가장 크므로, 맞히기와 함께 보정된 확률(<a href="#s5">5절</a>)을 직접 노린다. decider v10은 과제의 성공과 실패를 보상으로 쓰고, 다음 일의 확률을 답하는 belief 항에만 proper scoring rule을 쓴다(<a href="#s6-4">아래 상자</a>).</p>
 
-<details class="deep" id="s5-3"><summary>숫자 더 보기: 흔한 supervised learning 레시피 8개</summary>
-<p>대부분은 Qwen3.5 <a class="term" href="#g-base-model">base model</a>에 <a class="term" href="#g-lora">LoRA</a>나 전체 <a class="term" href="#g-fine-tuning">fine-tuning</a>을 하고, 정답 라벨에 대한 cross-entropy를 줄인다. cross-entropy는 정답 보기에 준 확률의 음의 로그다. 몇몇은 여기에 <a class="term" href="#g-brier">Brier 점수</a> 항을 더하거나, 학습 뒤 <a class="term" href="#g-temperature">온도</a>를 맞춘다(<a href="#s4">4절</a>).</p>
+<details class="deep" id="s6-3"><summary>숫자 더 보기: 흔한 supervised learning 레시피 8개</summary>
+<p>대부분은 Qwen3.5 <a class="term" href="#g-base-model">base model</a>에 <a class="term" href="#g-lora">LoRA</a>나 전체 <a class="term" href="#g-fine-tuning">fine-tuning</a>을 하고, 정답 라벨에 대한 cross-entropy를 줄인다. cross-entropy는 정답 보기에 준 확률의 음의 로그다. 몇몇은 여기에 <a class="term" href="#g-brier">Brier 점수</a> 항을 더하거나, 학습 뒤 <a class="term" href="#g-temperature">온도</a>를 맞춘다(<a href="#s5">5절</a>).</p>
 <div class="table-wrap"><table><caption>supervised learning 레시피 비교 (각 모델 카드, 레포, 논문의 자체 보고, 기준일 2026-10-06)</caption>
 <thead><tr><th>모델</th><th>base model</th><th>학습 대상</th><th>loss</th><th>데이터 규모</th></tr></thead>
 <tbody>
@@ -1671,7 +1733,7 @@ loss.backward(); clip_grad_norm(1.0); AdamW.step()     # train.py: lr 1e-5, beta
 <p>출처:<a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/decider/train.py" title="decider train.py">39</a><a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/decider/prompt.py" title="Mapika/decider prompt.py">21</a><a class="cite" href="https://github.com/Mapika/decider" title="Mapika/decider README">13</a></p>
 </details>
 
-<details class="deep" id="s5-4"><summary>깊이 보기: 보정을 직접 겨냥한 RL (decider v10)</summary>
+<details class="deep" id="s6-4"><summary>깊이 보기: 보정을 직접 겨냥한 RL (decider v10)</summary>
 <p>decider v10은 supervised learning을 마친 v8 가중치를 결과 보상만으로 더 학습한 모델이다. 학습 대상은 서빙되는 분포, 즉 슬롯의 문자 <a class="term" href="#g-logit">logit</a>을 온도 1.30으로 나눈 <a class="term" href="#g-softmax">softmax</a>다. 행동은 이 분포에서 뽑은 답 하나다. 보상은 브라우저 클릭, 지뢰찾기 같은 과제의 성공과 실패에서 나오고, 정답 라벨은 쓰지 않는다. 모델은 다음에 일어날 일의 확률도 답하고, 이 답은 정확한 확률 법칙에 대한 로그 점수로 채점된다. 이 항은 proper scoring rule이다.<a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/docs/RL.md" title="decider docs/RL.md">33</a> <span class="tag t-self">자체 보고</span></p>
 <p>학습은 576 스텝 일정으로 돌았고, 공개한 v10은 그중 384 스텝의 체크포인트다.<a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/docs/RL.md" title="decider docs/RL.md">33</a> <span class="tag t-self">자체 보고</span></p>
 <p>아래는 RL.md의 "Loss terms"와 "Optimizer"를 옮긴 의사코드다. <code>ppo_clip</code>은 한 스텝에 행동 확률이 너무 많이 바뀌지 않도록, 새 확률과 옛 확률의 비율을 0.2 범위 안에서 자르는 갱신이다. <code>KL</code>은 두 확률 분포가 얼마나 다른지 재는 값이다.</p>
@@ -1691,7 +1753,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <p>출처:<a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/docs/RL.md" title="decider docs/RL.md">33</a></p>
 </details>
 
-<h3 id="s5-1">Jev의 RLCD</h3>
+<h3 id="s6-1">Jev의 RLCD</h3>
 <p class="lead">TypeSafe는 Jev의 학습 방법을 <dfn id="d-rlcd">RLCD</dfn>(Reinforcement Learning for Calibrated Decisions)라고 부른다<a class="cite" href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" title="Introducing System One Models and Jev">1</a>. 공개된 정의는 한 줄이다. 글 대신 결정과 보정된 확률을 내도록 학습한다<a class="cite" href="https://docs.typesafe.ai/introduction/machine-learning-primer" title="TypeSafe machine learning primer">24</a>.</p>
 <p>이름에 RL이 들어 있지만, 보상 함수, 정책 구조, 데이터 구성은 공개되지 않았다 <span class="tag t-unverified">미확인</span>.</p>
 <details class="deep"><summary>원문 보기: RLCD 정의와 학습 데이터</summary>
@@ -1699,7 +1761,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <p>학습 데이터는 TypeSafe가 직접 만들고, 고객 데이터로는 학습하지 않는다.<a class="cite" href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" title="Introducing System One Models and Jev">1</a><a class="cite" href="https://docs.typesafe.ai/models" title="TypeSafe Models">2</a> <span class="tag t-vendor">업체 발표</span></p>
 </details>
 
-<h3 id="s5-2">같은 이름, 다른 내용</h3>
+<h3 id="s6-2">같은 이름, 다른 내용</h3>
 <p class="lead">공개 모델 중에도 이름에 RLCD를 붙인 것이 있다. 이름만 보고 RL로 학습했다고 판단할 수 없다.</p>
 <div class="table-wrap"><table><caption>RLCD라는 이름을 쓴 공개 모델이 실제로 하는 것 (각 카드와 레포의 자체 보고)</caption>
 <thead><tr><th>실제로는</th><th>예</th><th>근거</th></tr></thead>
@@ -1710,15 +1772,15 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 </tbody></table></div>
 <details class="deep"><summary>근거 보기: 세 가지 쓰임의 세부</summary>
 <ol>
-<li><b>문서화된 RL.</b> Laya는 RLCD라는 이름으로 RL 항을 구현했다. 행동은 모델이 보고하는 분포이고, 보상은 proper scoring rule이다. logit에 무작위 잡음을 더해 여러 분포를 시도하고, 평균 보상보다 나은 시도 쪽으로 가중치를 옮긴다.<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a> <span class="tag t-self">자체 보고</span> 공개된 fine-tuning 코드는 이 항에 소프트 cross-entropy를 더해 함께 쓴다. 소프트 cross-entropy는 타깃 분포를 직접 맞히는 supervised learning loss다. 저자의 코드 주석은 RL 항이 typed-decisions 분할에서 이득이 없었다고 적는다.<a class="cite" href="https://github.com/NandhaKishorM/laya" title="Laya GitHub (laya/train.py)">45</a> <span class="tag t-self">자체 보고</span> Laya에서 파생한 Lavoir는 이 항을 껐다.<a class="cite" href="https://huggingface.co/moganai/lavoir" title="Lavoir 모델 카드">46</a> <span class="tag t-self">자체 보고</span> decider v10의 RL 단계(<a href="#s5-4">위 상자</a>)는 RLCD라는 이름을 쓰지 않는다.</li>
+<li><b>문서화된 RL.</b> Laya는 RLCD라는 이름으로 RL 항을 구현했다. 행동은 모델이 보고하는 분포이고, 보상은 proper scoring rule이다. logit에 무작위 잡음을 더해 여러 분포를 시도하고, 평균 보상보다 나은 시도 쪽으로 가중치를 옮긴다.<a class="cite" href="https://huggingface.co/convaiinnovations/laya" title="convaiinnovations/laya 카드">32</a> <span class="tag t-self">자체 보고</span> 공개된 fine-tuning 코드는 이 항에 소프트 cross-entropy를 더해 함께 쓴다. 소프트 cross-entropy는 타깃 분포를 직접 맞히는 supervised learning loss다. 저자의 코드 주석은 RL 항이 typed-decisions 분할에서 이득이 없었다고 적는다.<a class="cite" href="https://github.com/NandhaKishorM/laya" title="Laya GitHub (laya/train.py)">45</a> <span class="tag t-self">자체 보고</span> Laya에서 파생한 Lavoir는 이 항을 껐다.<a class="cite" href="https://huggingface.co/moganai/lavoir" title="Lavoir 모델 카드">46</a> <span class="tag t-self">자체 보고</span> decider v10의 RL 단계(<a href="#s6-4">위 상자</a>)는 RLCD라는 이름을 쓰지 않는다.</li>
 <li><b>supervised learning에 붙인 이름.</b> heman10x의 ModernBERT-151M은 이름에 RLCD를 쓰지만, 카드가 적은 학습은 cross-entropy와 Brier loss, 사후 온도 맞춤이다.<a class="cite" href="https://huggingface.co/heman10x/rlcd-modernbert-151m" title="heman10x ModernBERT-151M 카드">40</a> <span class="tag t-self">자체 보고</span> NanoJev는 RLCD 학습을 미완료 로드맵 항목으로 두고 supervised learning만 한다.<a class="cite" href="https://github.com/TianyuCodings/NanoJev" title="TianyuCodings/NanoJev README">29</a> <span class="tag t-self">자체 보고</span></li>
 <li><b>학습 없이 빌린 이름.</b> harshatheg/Qwen-2.5-1B-RLCD는 가중치 없이 수정 없는 원본 모델과 디코딩 코드만 담는다.<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a> monotykamary/LFM2.5-2.6B-RLCD는 TypeSafe의 RLCD를 재현한 것이 아니라고 직접 밝힌다.<a class="cite" href="https://huggingface.co/monotykamary/LFM2.5-2.6B-RLCD" title="monotykamary/LFM2.5-2.6B-RLCD 카드">26</a> <span class="tag t-self">자체 보고</span></li>
 </ol>
 </details>
 
-<h3 id="s5-6">무엇이 점수를 정하나</h3>
+<h3 id="s6-6">무엇이 점수를 정하나</h3>
 <p class="lead">저자들은 점수를 학습 방법보다 base model이 더 크게 정한다고 쓴다<a class="cite" href="https://github.com/Mapika/decider" title="Mapika/decider README">13</a><span class="tag t-self">자체 보고</span>. RL이 같은 데이터의 supervised learning보다 나은지 보여 주는 대조 실험은 공개 자료에 없다 <span class="tag t-unverified">미확인</span>.</p>
-<details class="deep" id="s5-5"><summary>근거 보기: 저자들이 말하는 한계</summary>
+<details class="deep" id="s6-5"><summary>근거 보기: 저자들이 말하는 한계</summary>
 <p>점수는 학습 방법보다 base model이 더 크게 정하고, RL의 이득은 좁다.</p>
 <ul>
 <li>decider 저자는 인덱스 점수를 대부분 base model이 정한다고 쓴다. 지식 영역 점수는 Jev 0.69, decider-35b 0.51로 적는다.<a class="cite" href="https://github.com/Mapika/decider" title="Mapika/decider README">13</a> <span class="tag t-self">자체 보고</span> README는 판을 적지 않는다. Decision Index 0.3 데이터의 Jev 지식 영역은 공개 raw 0.6391, skill 0.5387이다.<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 데이터 (index.json)">41</a></li>
@@ -1753,12 +1815,12 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 </ul></details>
 </section>
 
-<section id="s6"><h2>6. 공개 가중치 모델</h2>
+<section id="s7"><h2>7. 공개 가중치 모델</h2>
 <style>
-#s6 #fig-s7-map svg { max-width: 32rem; display: block; margin-inline: auto; }
+#s7 #fig-s7-map svg { max-width: 32rem; display: block; margin-inline: auto; }
 </style>
 <p class="lead">Jev의 가중치는 공개되지 않았다. 대신 직접 내려받아 돌릴 수 있는 결정 모델이 많다. 학습된 숫자 파일을 이렇게 공개하는 것을 <dfn id="d-open-weights">공개 가중치(open weights)</dfn>라고 한다.</p>
-<p>Decision Index 0.3에는 모델 114개가 있고, 그중 92개가 Hugging Face 저장소를 가진다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. 그림 6-1은 대표 모델을 크기와 점수로 놓은 것이다.</p>
+<p>Decision Index 0.3에는 모델 114개가 있고, 그중 92개가 Hugging Face 저장소를 가진다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. 그림 7-1은 대표 모델을 크기와 점수로 놓은 것이다.</p>
 <figure id="fig-s7-map">
 <svg viewBox="0 0 480 300" role="img" aria-labelledby="fig-s7-map-t">
 <title id="fig-s7-map-t">대표 모델 19개의 크기와 Decision Index 0.3 점수. 대체로 클수록 높고, pplx-decider v1.1이 Jev 60.11을 넘는다</title>
@@ -1808,7 +1870,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <circle cx="438.6" cy="89.2" r="5" class="f-accent" stroke="var(--surface)" stroke-width="2"><title>Xor 1.2: 35.95B, DI 51.15</title></circle>
 <text x="438.6" y="109.2" font-size="12" text-anchor="middle">Xor 1.2</text>
 </svg>
-<figcaption><b>그림 6-1.</b> 대표 모델 19개의 크기와 점수. 점 하나가 모델 하나이고, 점에 마우스를 올리면 이름과 값이 보인다. 점수는 Decision Index 0.3의 Full score, 크기는 served_params다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. Decision Index에 행이 없는 H2O-Lightning-4B와 decider-12b v2는 빠졌다.</figcaption>
+<figcaption><b>그림 7-1.</b> 대표 모델 19개의 크기와 점수. 점 하나가 모델 하나이고, 점에 마우스를 올리면 이름과 값이 보인다. 점수는 Decision Index 0.3의 Full score, 크기는 served_params다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. Decision Index에 행이 없는 H2O-Lightning-4B와 decider-12b v2는 빠졌다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>Laya: 0.421B, 4.43</li>
@@ -1836,34 +1898,34 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 </figure>
 <p>대체로 클수록 점수가 높다. 27B급 pplx-decider v1.1(62.75)은 Jev(60.11)를 넘고, Torchcast(59.91), Kev 27B(58.78), Quyet(58.71)가 바로 아래에 있다. 1B 미만 인코더 Laya는 점수가 낮다. 같은 크기 안에서도 차이가 크다.</p>
 
-<h3 id="s6-2">대표 모델 21개</h3>
-<div class="table-wrap"><table><caption>대표 공개 가중치 모델 21개 (크기순). DI 점수는 Decision Index 0.3의 Full score이고, Jev는 60.11이다. 계열 글자는 <a href="#s3">3절</a>을 따른다.</caption>
+<h3 id="s7-2">대표 모델 21개</h3>
+<div class="table-wrap"><table><caption>대표 공개 가중치 모델 21개 (크기순). DI 점수는 Decision Index 0.3의 Full score이고, Jev는 60.11이다. 계열 글자는 <a href="#s4">4절</a>을 따른다.</caption>
 <thead><tr><th scope="col">모델</th><th scope="col">크기</th><th scope="col">계열</th><th scope="col">DI 점수</th><th scope="col">라이선스</th><th scope="col">필요 하드웨어</th></tr></thead>
 <tbody>
-<tr><th scope="row"><a href="https://huggingface.co/convaiinnovations/laya">Laya</a></th><td data-label="크기">421M</td><td data-label="방식"><a href="#s3-e">E</a></td><td data-label="DI 점수" class="num">4.43</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">T4</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/Mapika/decider-2b">decider-2b</a></th><td data-label="크기">2.27B</td><td data-label="방식"><a href="#s3-b">B</a></td><td data-label="DI 점수" class="num">25.80</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">GPU 1장</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/convaiinnovations/laya">Laya</a></th><td data-label="크기">421M</td><td data-label="방식"><a href="#s4-e">E</a></td><td data-label="DI 점수" class="num">4.43</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">T4</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/Mapika/decider-2b">decider-2b</a></th><td data-label="크기">2.27B</td><td data-label="방식"><a href="#s4-b">B</a></td><td data-label="DI 점수" class="num">25.80</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">GPU 1장</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/LiquidAI/d1-3B">LiquidAI d1-3B</a></th><td data-label="크기">3.12B</td><td data-label="방식"><span class="tag t-unverified">미확인</span></td><td data-label="DI 점수" class="num">40.08</td><td data-label="라이선스">other (lfm1.0)</td><td data-label="필요 하드웨어">RTX 4090, MI325X, M5 Pro</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/vllm-sr/Decision-2.0-Nox-4B">Decision 2.0 Nox 4B</a></th><td data-label="크기">4.21B</td><td data-label="방식"><span class="tag t-unverified">미확인</span></td><td data-label="DI 점수" class="num">44.95</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">GPU 1장</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/h2oai/h2o-lightning-4b">H2O-Lightning-4B v1.1</a></th><td data-label="크기">4.54B</td><td data-label="방식"><span class="tag t-unverified">미확인</span></td><td data-label="DI 점수" class="num">행 없음</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">RTX PRO 4500 32GB, H100</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/bespokelabs/Bespoke-Nimble-9B-v3">Bespoke Nimble 9B v3</a></th><td data-label="크기">9.65B</td><td data-label="방식"><span class="tag t-unverified">미확인</span></td><td data-label="DI 점수" class="num">54.67</td><td data-label="라이선스">cc-by-nc-4.0</td><td data-label="필요 하드웨어">미기재</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/vllm-sr/Decision-2.0-Lux-9B">Decision 2.0 Lux 9B</a></th><td data-label="크기">9.65B</td><td data-label="방식"><span class="tag t-unverified">미확인</span></td><td data-label="DI 점수" class="num">48.21</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">GPU 1장</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/jaredpalmer/kev-9b">Kev 9B v2</a></th><td data-label="크기">9.65B</td><td data-label="방식"><a href="#s3-c">C</a></td><td data-label="DI 점수" class="num">43.27</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">L40S 또는 H100</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/Cloudflare/clef-flash">Cloudflare clef-flash</a></th><td data-label="크기">9.65B</td><td data-label="방식"><a href="#s3-c">C</a></td><td data-label="DI 점수" class="num">47.61</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">H200 1장</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/jaredpalmer/kev-9b">Kev 9B v2</a></th><td data-label="크기">9.65B</td><td data-label="방식"><a href="#s4-c">C</a></td><td data-label="DI 점수" class="num">43.27</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">L40S 또는 H100</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/Cloudflare/clef-flash">Cloudflare clef-flash</a></th><td data-label="크기">9.65B</td><td data-label="방식"><a href="#s4-c">C</a></td><td data-label="DI 점수" class="num">47.61</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">H200 1장</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/HopitAI/hopper">Hopper 12B</a></th><td data-label="크기">11.96B</td><td data-label="방식"><span class="tag t-unverified">미확인</span></td><td data-label="DI 점수" class="num">47.27</td><td data-label="라이선스">other (Hub) ²</td><td data-label="필요 하드웨어">미기재</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/EldanRing/Winnow-12B">Winnow-12B</a></th><td data-label="크기">11.96B</td><td data-label="방식"><span class="tag t-unverified">미확인</span></td><td data-label="DI 점수" class="num">49.27</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">RTX 5070 Ti 16GB (Q8)</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/Mapika/decider-12b">decider-12b v2</a></th><td data-label="크기">12B급</td><td data-label="방식"><a href="#s3-b">B</a></td><td data-label="DI 점수" class="num">행 없음</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">미기재 (학습은 B300 1장)</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/PixilabAI/Blink-v0.3-26B-A4B-NVFP4">Blink v0.3 26B-A4B</a></th><td data-label="크기">25.8B</td><td data-label="방식"><a href="#s3-b">B</a></td><td data-label="DI 점수" class="num">57.76</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">RTX PRO 5000 1장</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Surogate Rune 26B-A4B v3</a></th><td data-label="크기">25.81B</td><td data-label="방식"><a href="#s3-b">B</a></td><td data-label="DI 점수" class="num">57.43</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">RTX PRO 6000</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/frontier-infra/jebadiah-27b">Jebadiah 27B</a></th><td data-label="크기">27.78B</td><td data-label="방식"><a href="#s3-b">B</a></td><td data-label="DI 점수" class="num">55.63</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">CUDA GPU 1장 또는 Apple Silicon Mac</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/jaredpalmer/kev-27b">Kev 27B</a></th><td data-label="크기">27.8B</td><td data-label="방식"><a href="#s3-c">C</a></td><td data-label="DI 점수" class="num">58.78</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">B200, H200, H100 80GB</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/Mapika/decider-12b">decider-12b v2</a></th><td data-label="크기">12B급</td><td data-label="방식"><a href="#s4-b">B</a></td><td data-label="DI 점수" class="num">행 없음</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">미기재 (학습은 B300 1장)</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/PixilabAI/Blink-v0.3-26B-A4B-NVFP4">Blink v0.3 26B-A4B</a></th><td data-label="크기">25.8B</td><td data-label="방식"><a href="#s4-b">B</a></td><td data-label="DI 점수" class="num">57.76</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">RTX PRO 5000 1장</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Surogate Rune 26B-A4B v3</a></th><td data-label="크기">25.81B</td><td data-label="방식"><a href="#s4-b">B</a></td><td data-label="DI 점수" class="num">57.43</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">RTX PRO 6000</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/frontier-infra/jebadiah-27b">Jebadiah 27B</a></th><td data-label="크기">27.78B</td><td data-label="방식"><a href="#s4-b">B</a></td><td data-label="DI 점수" class="num">55.63</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">CUDA GPU 1장 또는 Apple Silicon Mac</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/jaredpalmer/kev-27b">Kev 27B</a></th><td data-label="크기">27.8B</td><td data-label="방식"><a href="#s4-c">C</a></td><td data-label="DI 점수" class="num">58.78</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">B200, H200, H100 80GB</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/perplexity-ai/pplx-decider-v1.1-27b">pplx-decider v1.1 27B</a></th><td data-label="크기">27.8B</td><td data-label="방식">기타 ³</td><td data-label="DI 점수" class="num">62.75</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">CUDA GPU, 가중치 약 49 GiB</td></tr>
 <tr><th scope="row"><a href="https://huggingface.co/torchcast-ai/torchcast-decision-27b">Torchcast Decision 27B</a></th><td data-label="크기">27.8B</td><td data-label="방식"><span class="tag t-unverified">미확인</span></td><td data-label="DI 점수" class="num">59.91</td><td data-label="라이선스">cc-by-nc-4.0</td><td data-label="필요 하드웨어">H100 80GB 1장</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/Cloudflare/clef">Cloudflare clef</a></th><td data-label="크기">27.8B</td><td data-label="방식"><a href="#s3-c">C</a></td><td data-label="DI 점수" class="num">53.08</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">H200 1장</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/chinhnc/Quyet-1.0-Large">Quyet-1.0-Large</a></th><td data-label="크기">32.68B</td><td data-label="방식"><a href="#s3-b">B</a></td><td data-label="DI 점수" class="num">58.71</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">80GB GPU 1장</td></tr>
-<tr><th scope="row"><a href="https://huggingface.co/juspay/xor">Xor 1.2</a></th><td data-label="크기">35.95B</td><td data-label="방식"><a href="#s3-b">B</a></td><td data-label="DI 점수" class="num">51.15</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">H200 NVL 1장</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/Cloudflare/clef">Cloudflare clef</a></th><td data-label="크기">27.8B</td><td data-label="방식"><a href="#s4-c">C</a></td><td data-label="DI 점수" class="num">53.08</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">H200 1장</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/chinhnc/Quyet-1.0-Large">Quyet-1.0-Large</a></th><td data-label="크기">32.68B</td><td data-label="방식"><a href="#s4-b">B</a></td><td data-label="DI 점수" class="num">58.71</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">80GB GPU 1장</td></tr>
+<tr><th scope="row"><a href="https://huggingface.co/juspay/xor">Xor 1.2</a></th><td data-label="크기">35.95B</td><td data-label="방식"><a href="#s4-b">B</a></td><td data-label="DI 점수" class="num">51.15</td><td data-label="라이선스">apache-2.0</td><td data-label="필요 하드웨어">H200 NVL 1장</td></tr>
 </tbody></table></div>
 <details class="deep"><summary>표 더 보기: base model, 학습 형태, 공개 점수, ECE, JevBench 순위, Jev급</summary>
-<div class="table-wrap"><table><caption>추가 열: base model, 학습 형태, DI 공개 점수(public_skill), ECE, JevBench v1.6.1 Capability와 공개 보드 공식 순위, Jev급 여부(<a href="#s7-jevclass">7절</a>)</caption>
+<div class="table-wrap"><table><caption>추가 열: base model, 학습 형태, DI 공개 점수(public_skill), ECE, JevBench v1.6.1 Capability와 공개 보드 공식 순위, Jev급 여부(<a href="#s8-jevclass">8절</a>)</caption>
 <thead><tr><th scope="col">모델</th><th scope="col">base model</th><th scope="col">학습 형태</th><th scope="col">DI 공개 점수</th><th scope="col">ECE</th><th scope="col">JevBench Cap · 순위</th><th scope="col">Jev급</th></tr></thead>
 <tbody>
 <tr><th scope="row">Laya</th><td data-label="base model">ModernBERT-large</td><td data-label="학습 형태">전체 fine-tuning</td><td data-label="DI 공개 점수" class="num">6.19</td><td data-label="ECE" class="num">0.1402</td><td data-label="JevBench">32.5 · #120</td><td data-label="Jev급">밖: 지연 2.9배</td></tr>
@@ -1891,7 +1953,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 </details>
 <details class="deep"><summary>표 주석 보기: 계열, 값의 출처, 각주</summary>
 <ul class="table-notes">
-<li><b>계열.</b> B는 글자 logit 읽기, C는 candidate head(pointer head, joint schema head 포함), E는 RL 인코더다(<a href="#s3">3절</a>). 미확인은 해당 판의 카드가 읽는 방식을 적지 않은 경우다. Bespoke Nimble은 v2 카드가 허용 후보 logit을 읽는다고 적었지만(3절 계열 B), v3 카드는 적지 않았다.</li>
+<li><b>계열.</b> B는 글자 logit 읽기, C는 candidate head(pointer head, joint schema head 포함), E는 RL 인코더다(<a href="#s4">4절</a>). 미확인은 해당 판의 카드가 읽는 방식을 적지 않은 경우다. Bespoke Nimble은 v2 카드가 허용 후보 logit을 읽는다고 적었지만(4절 계열 B), v3 카드는 적지 않았다.</li>
 <li><b>값의 출처.</b> DI 점수와 공개 점수, ECE, 크기는 Decision Index 0.3 데이터다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. JevBench 열은 v1.6.1 결과 JSON의 Capability와 공개 보드 공식 순위다<a class="cite" href="https://benchmarkheaven.com/api/jevbench/v1.6.1" title="JevBench v1.6.1 결과 JSON">63</a>. 라이선스는 Hub 메타데이터, 하드웨어는 카드가 적은 값이다 <span class="tag t-self">자체 보고</span>.</li>
 <li><b>¹ d1-3B.</b> JevBench에는 API 행 "d1"(74.4, API 보드 2위)만 있고 공개 보드 행은 없다.</li>
 <li><b>² Hopper 12B.</b> Hub 저장소의 기본 브랜치는 4B이고 12B는 별도 브랜치다. Hub 라이선스 표기는 other이고, 카드는 12B를 Apache-2.0으로 적는다. 글자 logit 읽기는 4B에만 적혀 있어 12B의 계열은 미확인으로 두었다.</li>
@@ -1901,15 +1963,15 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 </details>
 <details class="deep"><summary>근거 보기: 표에 넣은 모델을 고른 방법</summary>
 <p>세 기준으로 골랐다. 크기는 1B 미만부터 36B까지 고루 넣는다. Decision Index 0.3과 JevBench v1.6.1 공개 보드의 상위 모델을 넣는다. 방식 계열 B, C, E를 하나 이상 넣는다. Decision Index 2위 Fastino GLiDE는 가중치가 공개되지 않아 뺐다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>.</p>
-<p>추론 기법만 쓰는 계열(<a href="#s3">3절</a>의 A와 F)은 새 가중치를 내지 않으므로 표에 없다.</p>
+<p>추론 기법만 쓰는 계열(<a href="#s4">4절</a>의 A와 F)은 새 가중치를 내지 않으므로 표에 없다.</p>
 </details>
-<details class="deep" id="s6-1"><summary>근거 보기: 모델이 몇 개인가 (레지스트리 집계)</summary>
+<details class="deep" id="s7-1"><summary>근거 보기: 모델이 몇 개인가 (레지스트리 집계)</summary>
 <ul>
 <li>114개의 형태별 개수는 전체 fine-tuning 50, LoRA 28, 추론 기법 20, LoRA + head 14, head 또는 어댑터 2다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>.</li>
 <li><a class="term" href="#g-jevbench">JevBench</a> v1.6.1의 로스터는 173개이고 점수 행은 140개다. 순위는 135개에 붙는다. 공개 가중치 128개(GPU 115, CPU 13)와 API 7개다<a class="cite" href="https://benchmarkheaven.com/api/jevbench/v1.6.1" title="JevBench v1.6.1 결과 JSON">63</a><a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>.</li>
 </ul>
 </details>
-<h3 id="s6-3">고르는 법</h3>
+<h3 id="s7-3">고르는 법</h3>
 <p class="lead">GPU 메모리, 라이선스, 비용 한도로 표를 좁힐 수 있다.</p>
 <div class="table-wrap"><table><caption>위 표에서 뽑은 선택 기준</caption>
 <thead><tr><th>기준</th><th>조건</th><th>표의 해당 모델</th></tr></thead>
@@ -1923,7 +1985,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <tr><td>비용과 지연</td><td>Jev급(Jev의 2배 이하)</td><td>H2O-Lightning-4B, Quyet-1.0-Large, decider-12b v2, Rune v3, Winnow-12B, Hopper 12B, Nimble 9B v3, clef-flash, decider-2b</td></tr>
 </tbody></table></div>
 
-<h3 id="s6-4">아직 공개되지 않은 것</h3>
+<h3 id="s7-4">아직 공개되지 않은 것</h3>
 <p class="lead">Decision Index Space의 트래커는 아직 공개되지 않은 것을 따로 적는다. 그중 Jev에 관한 것은 세 가지다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a>. 트래커는 제3자 큐레이션이다.</p>
 <ul>
 <li>TypeSafe의 Jev 가중치</li>
@@ -1942,21 +2004,21 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 
 </details>
 
-<details class="deep" id="s6-4b"><summary>근거 보기: 보정 주장 문장과 ECE 수치</summary>
+<details class="deep" id="s7-4b"><summary>근거 보기: 보정 주장 문장과 ECE 수치</summary>
 <p class="lead">트래커의 보정 문장과 Decision Index의 ECE 수치는 서로 다른 것을 재므로 나란히 놓아 읽는다.</p>
 <ul>
 <li>트래커: 공개 가중치 모델은 후보 logit에 softmax를 쓰고, 연구들은 모델의 확률이 오류를 믿을 만하게 가려내지 못한다고 본다. 이 문장은 ECE 수치를 들지 않는다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/news.html" title="Decision Index 트래커 news.html">25</a>.</li>
-<li>Decision Index 0.3: 전체 ECE는 Jev 0.074다. 자체 가중치가 있는 모델 중 가장 낮은 셋은 Jebadiah 27B 0.014, Kev 27B 0.0218, Decider 35B-A3B 0.0226이다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. 표본 수는 모델마다 다르다(Jev 72,594개, Jebadiah 35,093개). ECE의 뜻은 <a href="#s4">4절</a>에 있다.</li>
+<li>Decision Index 0.3: 전체 ECE는 Jev 0.074다. 자체 가중치가 있는 모델 중 가장 낮은 셋은 Jebadiah 27B 0.014, Kev 27B 0.0218, Decider 35B-A3B 0.0226이다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. 표본 수는 모델마다 다르다(Jev 72,594개, Jebadiah 35,093개). ECE의 뜻은 <a href="#s5">5절</a>에 있다.</li>
 </ul>
-<p>이 문서는 어느 쪽이 Jev의 보정 주장에 맞는지 판정하지 않는다. 평가 쪽 수치는 <a href="#s7">7절</a>에 있다.</p>
+<p>이 문서는 어느 쪽이 Jev의 보정 주장에 맞는지 판정하지 않는다. 평가 쪽 수치는 <a href="#s8">8절</a>에 있다.</p>
 </details>
 
-<details class="deep" id="s6-5"><summary>근거 보기: 이 목록의 한계 (판 날짜, 카드 확인 범위)</summary>
+<details class="deep" id="s7-5"><summary>근거 보기: 이 목록의 한계 (판 날짜, 카드 확인 범위)</summary>
 <ul>
 <li>Decision Index는 0.3(데이터 생성 2026-10-07)이다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. JevBench는 v1.6.1이다<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>. 두 보드 모두 계속 바뀐다. 2026-10-09 조회 기준이다.</li>
 <li>방식과 하드웨어는 카드가 적은 경우만 채웠다. 카드가 적지 않은 칸은 미확인이다.</li>
 <li>카드의 성능 수치는 저자가 직접 재서 보고한 값이고 독립 검증이 아니다 <span class="tag t-self">자체 보고</span>.</li>
-<li>Decision Index는 점추정만 내고 불확실성 구간을 내지 않는다(<a href="#s7-4">7절</a>).</li>
+<li>Decision Index는 점추정만 내고 불확실성 구간을 내지 않는다(<a href="#s8-4">8절</a>).</li>
 </ul>
 </details>
 <details class="sources-box"><summary>이 절의 출처</summary><ul class="sources">
@@ -1968,17 +2030,17 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <li>표의 라이선스, base model, 하드웨어, 읽는 방식을 뒷받침하는 모델 카드 21개: <a href="https://huggingface.co/convaiinnovations/laya">Laya 카드</a>, <a href="https://huggingface.co/Mapika/decider-2b">decider-2b 카드</a>, <a href="https://huggingface.co/LiquidAI/d1-3B">LiquidAI d1-3B 카드</a>, <a href="https://huggingface.co/vllm-sr/Decision-2.0-Nox-4B">Decision 2.0 Nox 4B 카드</a>, <a href="https://huggingface.co/h2oai/h2o-lightning-4b">H2O-Lightning-4B v1.1 카드</a>, <a href="https://huggingface.co/bespokelabs/Bespoke-Nimble-9B-v3">Bespoke Nimble 9B v3 카드</a>, <a href="https://huggingface.co/vllm-sr/Decision-2.0-Lux-9B">Decision 2.0 Lux 9B 카드</a>, <a href="https://huggingface.co/jaredpalmer/kev-9b">Kev 9B v2 카드</a>, <a href="https://huggingface.co/Cloudflare/clef-flash">Cloudflare clef-flash 카드</a>, <a href="https://huggingface.co/HopitAI/hopper">Hopper 12B 카드</a>, <a href="https://huggingface.co/EldanRing/Winnow-12B">Winnow-12B 카드</a>, <a href="https://huggingface.co/Mapika/decider-12b">decider-12b v2 카드</a>, <a href="https://huggingface.co/PixilabAI/Blink-v0.3-26B-A4B-NVFP4">Blink v0.3 26B-A4B 카드</a>, <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Surogate Rune 26B-A4B v3 카드</a>, <a href="https://huggingface.co/frontier-infra/jebadiah-27b">Jebadiah 27B 카드</a>, <a href="https://huggingface.co/jaredpalmer/kev-27b">Kev 27B 카드</a>, <a href="https://huggingface.co/perplexity-ai/pplx-decider-v1.1-27b">pplx-decider v1.1 27B 카드</a>, <a href="https://huggingface.co/torchcast-ai/torchcast-decision-27b">Torchcast Decision 27B 카드</a>, <a href="https://huggingface.co/Cloudflare/clef">Cloudflare clef 카드</a>, <a href="https://huggingface.co/chinhnc/Quyet-1.0-Large">Quyet-1.0-Large 카드</a>, <a href="https://huggingface.co/juspay/xor">Xor 1.2 카드</a></li>
 </ul></details></section>
 
-<section id="s7">
-<h2>7. 평가</h2>
+<section id="s8">
+<h2>8. 평가</h2>
 <p class="lead">결정 모델의 순위를 매기는 리더보드는 둘이다. Decision Index는 얼마나 맞히는지만 보고, JevBench는 확률의 정직함(보정)과 비용, 속도까지 본다.</p>
 <p><dfn id="d-decision-index"><a href="https://huggingface.co/spaces/multimodalart/jev-decision-index">Decision Index</a></dfn>는 공개 벤치마크 37개와 비공개 시험을 결정 형식으로 바꿔 정확도를 재는 커뮤니티 리더보드다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>. <dfn id="d-jevbench"><a href="https://benchmarkheaven.com/jev-models">JevBench</a></dfn>는 Benchmark Heaven이 직접 만든 결정 1,500건으로 <a class="term" href="#g-calibration">보정</a>까지 재는 벤치마크다<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>. 두 곳 모두 TypeSafe와 관계가 없다고 밝힌다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/README.md" title="Decision Index Space README">56</a><a class="cite" href="https://github.com/fstandhartinger/jevbench" title="JevBench 저장소">59</a>.</p>
 <style>
-#s7 .chart { max-width: 480px; margin-left: auto; margin-right: auto; }
-#s7 .chart svg text { font-size: 16px; }
-#s7 .chart svg text.ttl { font-size: 17px; font-weight: 700; }
-#s7 #fig-s8-noul svg { max-width: 32rem; display: block; margin-inline: auto; }
+#s8 .chart { max-width: 480px; margin-left: auto; margin-right: auto; }
+#s8 .chart svg text { font-size: 16px; }
+#s8 .chart svg text.ttl { font-size: 17px; font-weight: 700; }
+#s8 #fig-s8-noul svg { max-width: 32rem; display: block; margin-inline: auto; }
 </style>
-<p>이 그림은 두 보드에서 Jev와, 가중치가 공개된 최고 시스템의 총점을 보여 준다. JevBench 쪽 비교 대상은 비용과 지연이 Jev의 2배 이내인 Jev급 시스템 중 최고다(<a href="#s7-jevclass">아래</a>).</p>
+<p>이 그림은 두 보드에서 Jev와, 가중치가 공개된 최고 시스템의 총점을 보여 준다. JevBench 쪽 비교 대상은 비용과 지연이 Jev의 2배 이내인 Jev급 시스템 중 최고다(<a href="#s8-jevclass">아래</a>).</p>
 <figure id="fig-s11-1" class="chart">
 <svg viewBox="0 0 480 300" role="img" aria-labelledby="fig-s11-1-t">
 <title id="fig-s11-1-t">두 리더보드에서 Jev와 가중치가 공개된 최고 시스템의 점수 막대 비교. 두 보드 모두 공개 시스템이 앞선다</title>
@@ -1998,7 +2060,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <rect x="20" y="268" width="343.1" height="24" rx="4" class="f-c1"/>
 <text x="371" y="286">81.7</text>
 </svg>
-<figcaption><b>그림 7-1.</b> 두 판 모두 0에서 시작하는 100점 척도다. Decision Index 0.3(데이터 2026-10-07)<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>, JevBench v1.6.1<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>. 공개 최고는 가중치가 공개된 시스템 중 최고다. Decision Index 2위 Fastino GLiDE(60.21)는 가중치가 없어 뺐다. 두 판의 점수는 서로 비교하지 않는다.</figcaption>
+<figcaption><b>그림 8-1.</b> 두 판 모두 0에서 시작하는 100점 척도다. Decision Index 0.3(데이터 2026-10-07)<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a>, JevBench v1.6.1<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>. 공개 최고는 가중치가 공개된 시스템 중 최고다. Decision Index 2위 Fastino GLiDE(60.21)는 가중치가 없어 뺐다. 두 판의 점수는 서로 비교하지 않는다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>Decision Index 0.3 Full score: Jev 60.11, pplx-decider v1.1 27B 62.75.</li>
@@ -2008,7 +2070,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 </details>
 </figure>
 
-<h3 id="s7-1">두 리더보드 나란히</h3>
+<h3 id="s8-1">두 리더보드 나란히</h3>
 <div class="table-wrap"><table>
 <caption>두 리더보드가 재는 것 (Decision Index 0.3, JevBench v1.6.1)</caption>
 <thead><tr><th>항목</th><th>Decision Index 0.3</th><th>JevBench v1.6.1</th></tr></thead>
@@ -2028,7 +2090,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <tr><td>항목 출처</td><td>공개 지표는 0.2.1의 37개 벤치마크(<a href="https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro">MMLU-Pro</a>, <a href="https://gorilla.cs.berkeley.edu/leaderboard.html">BFCL</a> 등)를 쓴다. GSM8K는 다시 만들고 ForecastBench는 뺐다. 여기에 같은 영역과 새 영역의 비공개 시험을 더한다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a><a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/methodology.json" title="Decision Index 방법론 (methodology.json)">57</a></td><td>결정 1,500건 = 비공개 1,200건(Choice 600, Noul 300, Score 300) + 공개 300건(150, 75, 75)<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a></td></tr>
 <tr><td>점수 식</td><td>Full = 0.20×공개 + 0.50×비공개 같은 영역 + 0.30×비공개 새 영역. 비공개 점수는 튜닝하지 않은 기본 모델로 공개 척도에 맞춘다. 공개 지표는 벤치마크마다 우연 수준을 빼고 0–1로 자른 뒤, 다섯 영역을 가중 평균한다(Knowledge 25.85%, Language 25.85%, Retrieval 20.02%, Tools 18.28%, Arts 10%)<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/methodology.json" title="Decision Index 방법론 (methodology.json)">57</a></td><td>Capability = Intelligence와 Calibration의 평균. 공식 순위는 v1.5 방법 문서 기준으로 Intelligence, Calibration, Speed, Cost 네 축의 가중 조화평균이다<a class="cite" href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md" title="JevBench 방법 문서 (METHOD-v1.5)">66</a></td></tr>
 <tr><td>보정 반영</td><td>점수에 넣지 않는다. 32개 벤치마크에서 ECE, Brier 점수를 모델별로 보고한다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a></td><td>Capability의 절반. <a class="term" href="#g-choice">Choice</a>는 ECE와 TVD(두 확률 분포의 거리), Noul은 ECE와 Brier 점수, <a class="term" href="#g-score">Score</a>는 정규화 RPS(순서 있는 단계의 누적 확률 오차)와 top-level ECE다. 확률 없이 라벨만 내는 시스템은 Calibration 기여가 0이다<a class="cite" href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md" title="JevBench 방법 문서 (METHOD-v1.5)">66</a>. v1.6 페이지는 Calibration 방식이 그대로라고 적는다<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>. 타입별 가중치(v1.5는 50/25/25)가 v1.6에서도 같은지는 <span class="tag t-unverified">미확인</span>이다</td></tr>
-<tr><td>비용과 지연</td><td>점수에 넣지 않는다 (<code>"efficiency_in_score": false</code>). 지연은 따로 잰다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/methodology.json" title="Decision Index 방법론 (methodology.json)">57</a></td><td>공식 순위의 두 축. Jev급 한도는 v1.5에서 잰 Jev 값의 2배다(<a href="#s7-jevclass">아래</a>)<a class="cite" href="https://benchmarkheaven.com/api/jevbench/v1.6.1" title="JevBench v1.6.1 결과 JSON">63</a></td></tr>
+<tr><td>비용과 지연</td><td>점수에 넣지 않는다 (<code>"efficiency_in_score": false</code>). 지연은 따로 잰다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/methodology.json" title="Decision Index 방법론 (methodology.json)">57</a></td><td>공식 순위의 두 축. Jev급 한도는 v1.5에서 잰 Jev 값의 2배다(<a href="#s8-jevclass">아래</a>)<a class="cite" href="https://benchmarkheaven.com/api/jevbench/v1.6.1" title="JevBench v1.6.1 결과 JSON">63</a></td></tr>
 <tr><td>답하지 못한 항목</td><td>거부, 오류, 미지원 요청은 전체 분모에서 0점이다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/methodology.json" title="Decision Index 방법론 (methodology.json)">57</a></td><td>실패, 거부, 해석할 수 없는 답은 Intelligence에서 오답이고 Calibration에는 들어가지 않는다<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>. <a class="term" href="#g-noul">Noul</a>에서 yes 확률이 0.20 초과 0.80 미만이면 기권으로 보고 오답 처리한다<a class="cite" href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md" title="JevBench 방법 문서 (METHOD-v1.5)">66</a></td></tr>
 <tr><td>판과 날짜</td><td>0.3 (2026-10-06 판, 데이터 2026-10-07)<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/methodology.json" title="Decision Index 방법론 (methodology.json)">57</a></td><td>v1.6.1 (2026-10-05). 라이브 보드는 v1.7.28 (2026-10-09 조회)<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a></td></tr>
 </tbody></table></div>
@@ -2036,7 +2098,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <p>JevBench는 <a class="term" href="#g-question">질문</a>을 "rubric"이라고 부른다. 이 문서는 계속 질문이라고 쓴다.</p>
 </details>
 
-<h3 id="s7-jevclass">Jev급: Jev만큼 싸고 빠른 시스템</h3>
+<h3 id="s8-jevclass">Jev급: Jev만큼 싸고 빠른 시스템</h3>
 <p class="lead">JevBench는 비용과 지연이 Jev의 2배 이하인 시스템, 곧 Jev급만 공식 비교한다. v1.6.1에서 Jev 자신은 순위 없는 기준 행이다.</p>
 <p>한도는 v1.5에서 잰 Jev 값의 2배다. 비용은 결정 1,000건에 $0.0646, 중앙값 지연은 1.23초다<a class="cite" href="https://benchmarkheaven.com/api/jevbench/v1.6.1" title="JevBench v1.6.1 결과 JSON">63</a>. 공개 보드에서 Capability가 Jev(77.1)보다 높은 시스템은 7개다. Jev급 안은 Quyet-1.0-Large 81.7, decisio(gemma-4-31B) 79.6, deck-31B 77.6이다. 밖은 pplx-decider v1.1 82.8, Torchcast 81.6, Kev 27B 78.9, Eikos 77.2다<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>.</p>
 <details class="deep"><summary>근거 보기: 한도 원문과 API 보드</summary>
@@ -2044,7 +2106,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <p>API 보드에서도 Jev급 안에서 Jev보다 높은 시스템은 Sage(78.6) 하나다. 범용 LLM은 Capability가 훨씬 높지만(GPT-6 Luna medium 98.4 등) 비용 한도 밖이다<a class="cite" href="https://benchmarkheaven.com/jev-models/api" title="JevBench API 보드">67</a>.</p>
 </details>
 
-<h3 id="s7-2">Jev와 공개 시스템의 결과</h3>
+<h3 id="s8-2">Jev와 공개 시스템의 결과</h3>
 <p class="lead">Decision Index 0.3과 JevBench v1.6.1에서는 총점(Full score), 다섯 영역(combined 기준), Capability 모두 Jev 외 최고 시스템이 Jev보다 높다<a class="cite" href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json" title="Decision Index 0.3 데이터 (index.json)">41</a><a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>.</p>
 <div class="table-wrap"><table><caption>Decision Index 0.3: Jev와 Jev 외 최고 시스템. 영역 점수는 공개와 비공개를 합친 combined 값(0–1)이다. ECE만 낮을수록 좋다.</caption>
 <thead><tr><th scope="col">지표</th><th scope="col">Jev</th><th scope="col">Jev 외 최고</th></tr></thead>
@@ -2071,7 +2133,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 <p>Jev는 Noul 답의 21.3%를 기권했고, 기권은 오답으로 센다. 같은 비율은 Quyet 8.8%, H2O 0%다<a class="cite" href="https://benchmarkheaven.com/api/jevbench/v1.6.1" title="JevBench v1.6.1 결과 JSON">63</a>. Jev의 보정 세부는 Choice ECE 0.0378, Noul ECE 0.0636, Score nRPS 0.0507이다<a class="cite" href="https://benchmarkheaven.com/api/jevbench/v1.6.1" title="JevBench v1.6.1 결과 JSON">63</a>.</p>
 </details>
 
-<h3 id="s7-4">각 리더보드가 밝힌 주의점</h3>
+<h3 id="s8-4">각 리더보드가 밝힌 주의점</h3>
 <p class="lead">두 리더보드 모두 한계를 적어 두었고, 판도 계속 바뀐다.</p>
 <details class="deep"><summary>근거 보기: 주의점과 판 차이</summary>
 <ul>
@@ -2083,7 +2145,7 @@ AdamW(peak lr 1e-6, cosine over 576 steps, grad clip 1.0).step()   # released v1
 </ul>
 </details>
 
-<h3 id="s7-5">평가 항목 하나</h3>
+<h3 id="s8-5">평가 항목 하나</h3>
 <p class="lead">JevBench 항목은 <a class="term" href="#g-state">상태</a>, 질문, 기준, 답 후보(<code>labels</code>), 정답 라벨(<code>expected</code>)로 이루어진다.</p>
 <p>아래는 공개 항목 <code>original-policy-02-1</code>을 그대로 옮긴 것이다. 그 아래에 우리말 풀이를 붙였다<a class="cite" href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/datasets/public/original.jsonl" title="JevBench 공개 항목">16</a>.</p>
 <pre><code>id:           original-policy-02-1   (type: noul)
@@ -2121,7 +2183,7 @@ expected:     yes</code></pre>
 <circle cx="307.2" cy="60" r="5" class="f-fg"/>
 <text x="301.2" y="130" font-size="13" text-anchor="end">0.65 → 기권, 오답</text>
 </svg>
-<figcaption><b>그림 7-2.</b> JevBench의 Noul 채점 규칙. yes 확률이 0.80 이상이어야 yes로, 0.20 이하여야 no로 채점하고, 그 사이는 기권으로 보아 오답 처리한다<a class="cite" href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md" title="JevBench 방법 문서 (METHOD-v1.5)">66</a>. v1.6.1 페이지도 같은 기준을 적는다<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>. 확신이 애매하면 맞는 쪽으로 기울어 있어도 점수를 받지 못한다.</figcaption>
+<figcaption><b>그림 8-2.</b> JevBench의 Noul 채점 규칙. yes 확률이 0.80 이상이어야 yes로, 0.20 이하여야 no로 채점하고, 그 사이는 기권으로 보아 오답 처리한다<a class="cite" href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md" title="JevBench 방법 문서 (METHOD-v1.5)">66</a>. v1.6.1 페이지도 같은 기준을 적는다<a class="cite" href="https://benchmarkheaven.com/jev-models/v1.6.1" title="JevBench v1.6.1 페이지">62</a>. 확신이 애매하면 맞는 쪽으로 기울어 있어도 점수를 받지 못한다.</figcaption>
 <details class="fig-text"><summary>그림을 글로 보기</summary>
 <ul>
 <li>yes 확률 0.20 이하: no로 채점.</li>
@@ -2148,9 +2210,9 @@ expected:     yes</code></pre>
 </ul></details>
 </section>
 
-<section id="s8"><h2>8. 용어집과 출처</h2>
-<h3 id="s8-1">용어집</h3>
-<details class="sources-box"><summary>용어집 보기 (47개, 정의된 절 순서)</summary>
+<section id="s9"><h2>9. 용어집과 출처</h2>
+<h3 id="s9-1">용어집</h3>
+<details class="sources-box"><summary>용어집 보기 (48개, 정의된 절 순서)</summary>
 <dl class="glossary">
 <dt id="g-decision-model">결정 모델 <span lang="en">(decision model)</span></dt><dd>소프트웨어가 바로 쓰는 결정, 곧 정해진 선택지 하나와 그 확률을 내는 모델이다. Jev와, 제3자가 가중치나 코드를 공개한 여러 모델이 여기에 속한다. <a href="#s1">1절</a></dd>
 <dt id="g-system-one">System One</dt><dd>TypeSafe가 결정 모델 계열에 붙인 이름이며, Kahneman의 빠른 직관 System 1에서 따왔다. <a href="#s1">1절</a></dd>
@@ -2171,37 +2233,38 @@ expected:     yes</code></pre>
 <dt id="g-readout">logit 읽기 <span lang="en">(logit readout)</span></dt><dd>답을 쓰지 않고, 정해진 토큰의 logit을 읽어 확률로 바꾸는 방식이다. <a href="#s1">1절</a></dd>
 <dt id="g-allowed-tokens">허용 토큰 <span lang="en">(allowed tokens)</span></dt><dd>답으로 인정하는 토큰의 집합이다. 예를 들면 보기 레이블 문자다. <a href="#s1">1절</a></dd>
 <dt id="g-output-tokens">출력 토큰 <span lang="en">(output tokens)</span></dt><dd>모델이 생성으로 써 낸 토큰이다. 응답의 <code>usage.output_tokens</code> 값과의 관계는 <a href="#s1">1절</a>이 다룬다. <a href="#s1">1절</a></dd>
-<dt id="g-constrained-decoding">constrained decoding</dt><dd>생성할 수 있는 토큰을 허용 집합으로 제한하는 디코딩 방식이다. <a href="#s2">2절</a></dd>
-<dt id="g-pcd">PCD <span lang="en">(parallel constrained decoding)</span></dt><dd>상태를 한 번 계산한 뒤 질문별 시퀀스를 배치로 묶어 허용 토큰의 logit을 병렬로 읽는 방식이다. <a href="#s2">2절</a></dd>
-<dt id="g-score">Score</dt><dd>순서 있는 수준 척도에서 점수를 매기는 질문 타입이다. 수준은 2~10개다. <a href="#s2">2절</a></dd>
-<dt id="g-text-diffusion">text diffusion <span lang="ko">(텍스트 디퓨전)</span></dt><dd>고정 길이의 토큰 판 전체를 여러 단계에 걸쳐 동시에 고쳐 쓰는 방식이다. 토큰을 앞에서부터 하나씩 쓰지 않는다. <a href="#s3">3절</a></dd>
-<dt id="g-fine-tuning">fine-tuning <span lang="ko">(미세조정)</span></dt><dd>사전학습된 모델을 새 목적의 데이터로 조금 더 학습시키는 일이다. <a href="#s3">3절</a></dd>
-<dt id="g-lora">LoRA</dt><dd>base model을 고정하고 작은 저랭크 행렬만 학습하는 fine-tuning 방식이다. <a href="#s3">3절</a></dd>
-<dt id="g-head">head <span lang="ko">(헤드)</span></dt><dd>모델 몸통 위에 얹어 내부 표현을 점수나 확률로 바꾸는 작은 출력 층이다. <a href="#s3">3절</a></dd>
-<dt id="g-prefill">prefill <span lang="ko">(프리필)</span></dt><dd>입력 전체를 한 번 통과시켜 KV cache를 만드는 첫 forward pass 단계다. <a href="#s3">3절</a></dd>
-<dt id="g-hidden-state">hidden state <span lang="ko">(은닉 상태)</span></dt><dd>모델 층이 토큰마다 만드는 내부 숫자 벡터다. head가 이를 점수로 바꾼다. <a href="#s3">3절</a></dd>
-<dt id="g-cross-encoder">cross-encoder <span lang="ko">(교차 인코더)</span></dt><dd>상태와 보기 하나를 이어 붙여 함께 읽고 점수 하나를 내는 모델이다. <a href="#s3">3절</a></dd>
-<dt id="g-supervised">supervised learning <span lang="ko">(지도학습)</span></dt><dd>입력마다 정답 라벨을 주고 그 라벨에 대한 loss를 줄이는 학습이다. <a href="#s3">3절</a></dd>
-<dt id="g-cross-entropy">cross-entropy <span lang="ko">(교차 엔트로피)</span></dt><dd>정답 라벨에 낮은 확률을 줄수록 커지는 loss다. <a href="#s3">3절</a></dd>
-<dt id="g-temperature">온도 <span lang="en">(temperature)</span></dt><dd>logit을 나누는 양수다. 클수록 확률 분포가 평평해진다. <a href="#s4">4절</a></dd>
-<dt id="g-calibration">보정 <span lang="en">(calibration)</span></dt><dd>확률 0.8로 낸 답의 약 80%가 맞는 성질이다. 집단 수준의 속성이다. <a href="#s4">4절</a></dd>
-<dt id="g-proper-scoring">proper scoring rule <span lang="ko">(적절한 점수 규칙)</span></dt><dd>참 확률을 정직하게 보고할 때 기대 점수가 가장 좋아지는 점수 함수다. <a href="#s4">4절</a></dd>
-<dt id="g-rlhf">RLHF <span lang="en">(reinforcement learning with human feedback)</span></dt><dd>사람이 고른 답을 보상으로 채팅 모델을 다듬는 학습이다. <a href="#s4">4절</a></dd>
-<dt id="g-ece">ECE <span lang="en">(expected calibration error)</span></dt><dd>구간별 평균 최고 확률과 정확도의 차이를 가중 평균한 값이다. 낮을수록 좋다. <a href="#s4">4절</a></dd>
-<dt id="g-brier">Brier 점수 <span lang="en">(Brier score)</span></dt><dd>예측 확률과 실제 결과(0 또는 1)의 차이를 제곱해 평균한 값이다. 낮을수록 좋다. <a href="#s4">4절</a></dd>
-<dt id="g-rps">RPS <span lang="en">(ranked probability score)</span></dt><dd>순서 있는 단계에서 누적 확률의 오차를 재는 점수다. <a href="#s4">4절</a></dd>
-<dt id="g-rlcd">RLCD</dt><dd>TypeSafe가 Jev에 쓴다고 밝힌 학습 방법(Reinforcement Learning for Calibrated Decisions)이다. 알고리즘 세부는 미확인이다. <a href="#s5">5절</a></dd>
-<dt id="g-loss">loss <span lang="ko">(손실)</span></dt><dd>학습 중 줄이려는 숫자다. 예측이 틀릴수록 커진다. <a href="#s5">5절</a></dd>
-<dt id="g-rl">RL <span lang="ko">(reinforcement learning, 강화학습)</span></dt><dd>모델의 행동 결과에 점수(보상)를 주고 그 점수를 높이도록 학습하는 방법이다. <a href="#s5">5절</a></dd>
-<dt id="g-open-weights">공개 가중치 <span lang="en">(open weights)</span></dt><dd>가중치 파일이 공개되어 내려받아 쓸 수 있는 모델이다. <a href="#s6">6절</a></dd>
-<dt id="g-jevbench">JevBench</dt><dd>benchmarkheaven의 단일 벤치마크다. 항목은 상태, 질문, 정답 라벨로 이루어진다. <a href="#s7">7절</a></dd>
-<dt id="g-jev-class">Jev급 <span lang="en">(Jev-class)</span></dt><dd>비용과 중앙값 지연이 둘 다 Jev의 2배 이하인 시스템이다. JevBench는 이 범위 안의 시스템만 공식 비교한다. <a href="#s7">7절</a></dd>
-<dt id="g-capability">Capability</dt><dd>JevBench의 총점이다. 정확도(Intelligence)와 보정(Calibration)의 평균이다. <a href="#s7">7절</a></dd>
-<dt id="g-decision-index">Decision Index</dt><dd>Hugging Face Space의 커뮤니티 리더보드다. 0.3판은 공개 벤치마크 37개와 비공개 시험을 합쳐 Full score를 낸다. <a href="#s7">7절</a></dd>
-<dt id="g-tvd">TVD <span lang="en">(total variation distance)</span></dt><dd>두 확률 분포가 얼마나 다른지 재는 거리다. <a href="#s7">7절</a></dd>
+<dt id="g-bert-classifier">BERT 분류기 <span lang="en">(BERT classifier)</span></dt><dd>사전학습된 BERT 인코더 위에 라벨 수만큼의 출력층을 붙여 fine-tuning한 분류 모델이다. 라벨은 학습 때 정해진다. <a href="#s2">2절</a></dd>
+<dt id="g-constrained-decoding">constrained decoding</dt><dd>생성할 수 있는 토큰을 허용 집합으로 제한하는 디코딩 방식이다. <a href="#s3">3절</a></dd>
+<dt id="g-pcd">PCD <span lang="en">(parallel constrained decoding)</span></dt><dd>상태를 한 번 계산한 뒤 질문별 시퀀스를 배치로 묶어 허용 토큰의 logit을 병렬로 읽는 방식이다. <a href="#s3">3절</a></dd>
+<dt id="g-score">Score</dt><dd>순서 있는 수준 척도에서 점수를 매기는 질문 타입이다. 수준은 2~10개다. <a href="#s3">3절</a></dd>
+<dt id="g-text-diffusion">text diffusion <span lang="ko">(텍스트 디퓨전)</span></dt><dd>고정 길이의 토큰 판 전체를 여러 단계에 걸쳐 동시에 고쳐 쓰는 방식이다. 토큰을 앞에서부터 하나씩 쓰지 않는다. <a href="#s4">4절</a></dd>
+<dt id="g-fine-tuning">fine-tuning <span lang="ko">(미세조정)</span></dt><dd>사전학습된 모델을 새 목적의 데이터로 조금 더 학습시키는 일이다. <a href="#s4">4절</a></dd>
+<dt id="g-lora">LoRA</dt><dd>base model을 고정하고 작은 저랭크 행렬만 학습하는 fine-tuning 방식이다. <a href="#s4">4절</a></dd>
+<dt id="g-head">head <span lang="ko">(헤드)</span></dt><dd>모델 몸통 위에 얹어 내부 표현을 점수나 확률로 바꾸는 작은 출력 층이다. <a href="#s4">4절</a></dd>
+<dt id="g-prefill">prefill <span lang="ko">(프리필)</span></dt><dd>입력 전체를 한 번 통과시켜 KV cache를 만드는 첫 forward pass 단계다. <a href="#s4">4절</a></dd>
+<dt id="g-hidden-state">hidden state <span lang="ko">(은닉 상태)</span></dt><dd>모델 층이 토큰마다 만드는 내부 숫자 벡터다. head가 이를 점수로 바꾼다. <a href="#s4">4절</a></dd>
+<dt id="g-cross-encoder">cross-encoder <span lang="ko">(교차 인코더)</span></dt><dd>상태와 보기 하나를 이어 붙여 함께 읽고 점수 하나를 내는 모델이다. <a href="#s4">4절</a></dd>
+<dt id="g-supervised">supervised learning <span lang="ko">(지도학습)</span></dt><dd>입력마다 정답 라벨을 주고 그 라벨에 대한 loss를 줄이는 학습이다. <a href="#s4">4절</a></dd>
+<dt id="g-cross-entropy">cross-entropy <span lang="ko">(교차 엔트로피)</span></dt><dd>정답 라벨에 낮은 확률을 줄수록 커지는 loss다. <a href="#s4">4절</a></dd>
+<dt id="g-temperature">온도 <span lang="en">(temperature)</span></dt><dd>logit을 나누는 양수다. 클수록 확률 분포가 평평해진다. <a href="#s5">5절</a></dd>
+<dt id="g-calibration">보정 <span lang="en">(calibration)</span></dt><dd>확률 0.8로 낸 답의 약 80%가 맞는 성질이다. 집단 수준의 속성이다. <a href="#s5">5절</a></dd>
+<dt id="g-proper-scoring">proper scoring rule <span lang="ko">(적절한 점수 규칙)</span></dt><dd>참 확률을 정직하게 보고할 때 기대 점수가 가장 좋아지는 점수 함수다. <a href="#s5">5절</a></dd>
+<dt id="g-rlhf">RLHF <span lang="en">(reinforcement learning with human feedback)</span></dt><dd>사람이 고른 답을 보상으로 채팅 모델을 다듬는 학습이다. <a href="#s5">5절</a></dd>
+<dt id="g-ece">ECE <span lang="en">(expected calibration error)</span></dt><dd>구간별 평균 최고 확률과 정확도의 차이를 가중 평균한 값이다. 낮을수록 좋다. <a href="#s5">5절</a></dd>
+<dt id="g-brier">Brier 점수 <span lang="en">(Brier score)</span></dt><dd>예측 확률과 실제 결과(0 또는 1)의 차이를 제곱해 평균한 값이다. 낮을수록 좋다. <a href="#s5">5절</a></dd>
+<dt id="g-rps">RPS <span lang="en">(ranked probability score)</span></dt><dd>순서 있는 단계에서 누적 확률의 오차를 재는 점수다. <a href="#s5">5절</a></dd>
+<dt id="g-rlcd">RLCD</dt><dd>TypeSafe가 Jev에 쓴다고 밝힌 학습 방법(Reinforcement Learning for Calibrated Decisions)이다. 알고리즘 세부는 미확인이다. <a href="#s6">6절</a></dd>
+<dt id="g-loss">loss <span lang="ko">(손실)</span></dt><dd>학습 중 줄이려는 숫자다. 예측이 틀릴수록 커진다. <a href="#s6">6절</a></dd>
+<dt id="g-rl">RL <span lang="ko">(reinforcement learning, 강화학습)</span></dt><dd>모델의 행동 결과에 점수(보상)를 주고 그 점수를 높이도록 학습하는 방법이다. <a href="#s6">6절</a></dd>
+<dt id="g-open-weights">공개 가중치 <span lang="en">(open weights)</span></dt><dd>가중치 파일이 공개되어 내려받아 쓸 수 있는 모델이다. <a href="#s7">7절</a></dd>
+<dt id="g-jevbench">JevBench</dt><dd>benchmarkheaven의 단일 벤치마크다. 항목은 상태, 질문, 정답 라벨로 이루어진다. <a href="#s8">8절</a></dd>
+<dt id="g-jev-class">Jev급 <span lang="en">(Jev-class)</span></dt><dd>비용과 중앙값 지연이 둘 다 Jev의 2배 이하인 시스템이다. JevBench는 이 범위 안의 시스템만 공식 비교한다. <a href="#s8">8절</a></dd>
+<dt id="g-capability">Capability</dt><dd>JevBench의 총점이다. 정확도(Intelligence)와 보정(Calibration)의 평균이다. <a href="#s8">8절</a></dd>
+<dt id="g-decision-index">Decision Index</dt><dd>Hugging Face Space의 커뮤니티 리더보드다. 0.3판은 공개 벤치마크 37개와 비공개 시험을 합쳐 Full score를 낸다. <a href="#s8">8절</a></dd>
+<dt id="g-tvd">TVD <span lang="en">(total variation distance)</span></dt><dd>두 확률 분포가 얼마나 다른지 재는 거리다. <a href="#s8">8절</a></dd>
 </dl>
 </details>
-<h3 id="s8-2">출처</h3>
+<h3 id="s9-2">출처</h3>
 <details class="sources-box"><summary>전체 출처 목록</summary><ol class="all-sources">
 <li><a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev">Introducing System One Models and Jev</a></li>
 <li><a href="https://docs.typesafe.ai/models">TypeSafe Models</a></li>
@@ -2257,9 +2320,11 @@ expected:     yes</code></pre>
 <li><a href="https://benchmarkheaven.com/api/jevbench/latest">JevBench 최신 결과 JSON</a></li>
 <li><a href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md">JevBench 방법 문서 (METHOD-v1.5)</a></li>
 <li><a href="https://benchmarkheaven.com/jev-models/api">JevBench API 보드</a></li>
+<li><a href="https://arxiv.org/abs/1810.04805">BERT 논문 (arXiv 1810.04805)</a></li>
+<li><a href="https://arxiv.org/abs/2609.32160">Jev 감사 논문 (arXiv 2609.32160)</a></li>
 </ol></details>
-<h3 id="s8-3">상태 표시</h3>
-<details class="sources-box" id="s8-legend"><summary>상태 표시 (문장 끝 태그의 뜻)</summary>
+<h3 id="s9-3">상태 표시</h3>
+<details class="sources-box" id="s9-legend"><summary>상태 표시 (문장 끝 태그의 뜻)</summary>
 <div class="legend" role="group" aria-label="상태 표시">
         <ul>
       <li><span class="tag t-vendor">업체 발표</span><span>TypeSafe AI가 직접 주장하거나 측정한 내용</span></li>
