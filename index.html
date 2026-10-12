@@ -520,7 +520,7 @@ return answer, p                             # nothing is generated: 0 output to
 <style>
 #s3 figure svg { max-width: 32rem; display: block; margin-inline: auto; }
 </style>
-<p class="lead">질문이 여러 개여도 <a class="term" href="#g-state">상태</a>(메일)는 한 번만 읽는다. 그리고 <a class="term" href="#g-question">질문</a> 사이에 칸막이를 쳐서 서로의 글을 못 보게 한다.</p>
+<p class="lead">여러 <a class="term" href="#g-question">질문</a>을 묶으면 같은 <a class="term" href="#g-state">상태</a>(메일)의 계산을 나눠 쓸 수 있다. 질문 사이에 칸막이를 쳐서 서로의 글을 못 보게 하는 격리는 별개의 성질이다. 두 가지를 모두 지원하는지는 구현마다 다르다.</p>
 
 <figure id="fig-s2-1">
 <svg viewBox="0 0 480 426" role="img" aria-labelledby="fig-s2-1-t">
@@ -637,17 +637,17 @@ return answer, p                             # nothing is generated: 0 output to
 
 <details class="deep"><summary>깊이 보기: PCD의 구현</summary>
 <p>stephanj의 구현은 세 단계로 일한다<a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a>. 먼저 스키마와 상태를 한 번 forward pass를 해 KV cache를 만든다. 다음으로 질문마다 시퀀스를 하나씩 두고, 모든 시퀀스가 그 KV cache를 공유한다. 구현에서는 질문을 "필드"라고 부른다. 각 시퀀스는 <code>"field": "</code>로 끝나므로 다음 자리가 답 자리다. 마지막으로 한 배치 forward pass로 각 시퀀스의 허용 토큰 logit을 읽는다. 저자는 이렇게 하면 토큰별 생성 없이 forward pass 두 번으로 끝난다고 쓴다.</p>
-<p>시퀀스가 질문마다 따로이므로 한 질문은 다른 질문의 글을 보지 않는다. MoJev는 attention 마스크로 같은 격리를 만든다. attention 마스크는 각 토큰이 어느 토큰을 참고할지 정하는 표다. MoJev README는 각 후보가 상태, 자기 질문, 자기 토큰만 참고한다고 쓴다<a class="cite" href="https://github.com/MoLeMo-Lab/mojev" title="MoJev README">19</a> <span class="tag t-self">자체 보고</span>. 모든 결정 모델이 상태를 공유하지는 않는다. Decision 1.0은 질문마다 forward pass를 한 번씩 하고 상태 활성값을 재사용하지 않는다<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a>.</p>
+<p>PCD의 시퀀스는 질문마다 따로이지만, 공유 KV cache에는 전체 필드의 설명과 선택지가 들어 있다. 따라서 각 질문은 다른 질문의 설명도 볼 수 있다. 다른 필드의 답을 입력으로 받지 않는 것과 다른 질문의 글을 보지 못하는 것은 다르다<a class="cite" href="https://raw.githubusercontent.com/stephanj/parallelConstraintDecoding/master/java/src/main/java/pcd/Prompts.java" title="PCD Prompts.java">70</a>. MoJev는 attention 마스크로 질문의 글까지 격리한다. attention 마스크는 각 토큰이 어느 토큰을 참고할지 정하는 표다. MoJev README는 각 후보가 상태, 자기 질문, 자기 토큰만 참고한다고 쓴다<a class="cite" href="https://github.com/MoLeMo-Lab/mojev" title="MoJev README">19</a> <span class="tag t-self">자체 보고</span>. 모든 결정 모델이 상태를 공유하지는 않는다. Decision 1.0은 질문마다 forward pass를 한 번씩 하고 상태 활성값을 재사용하지 않는다<a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a>.</p>
 <blockquote lang="en"><p>Fill a whole JSON schema of booleans and enums in two forward passes instead of generating it token by token</p><footer><a class="cite" href="https://github.com/stephanj/parallelConstraintDecoding" title="stephanj/parallelConstraintDecoding README">14</a></footer></blockquote>
 <blockquote lang="en"><p>Each candidate attends to the state, its own question, and its own tokens</p><footer><a class="cite" href="https://github.com/MoLeMo-Lab/mojev" title="MoJev README">19</a></footer></blockquote>
 <blockquote lang="en"><p>The current implementation does not reuse state activations across questions</p><footer><a class="cite" href="https://vllm-sr.ai/decision-paper.pdf" title="Decision 1.0 논문">8</a></footer></blockquote>
 </details>
 
 <details class="deep"><summary>근거 보기: 격리하지 않는 결정 모델과 격리의 한계</summary>
-<p>TypeSafe가 질문을 묶어도 답이 같다고 말하려면 격리가 필요하다. 모든 결정 모델이 격리하지는 않는다. text diffusion 방식의 open-jev에서는 여러 질문이 한 canvas의 attention을 공유한다. 저자는 이 방식이 Jev의 질문별 격리를 재현하지 못한다고 쓴다<a class="cite" href="https://github.com/JoshuaSP/open-jev" title="JoshuaSP/open-jev README">20</a>. decider의 답 슬롯은 문맥과 모든 질문을 보고, 앞선 답만 보지 못한다<a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/decider/prompt.py" title="Mapika/decider prompt.py">21</a>.</p>
+<p>TypeSafe가 질문을 묶어도 답이 같다고 말하려면 격리가 필요하다. 모든 결정 모델이 격리하지는 않는다. text diffusion 방식의 open-jev에서는 여러 질문이 한 canvas의 attention을 공유한다. 저자는 이 방식이 Jev의 질문별 격리를 재현하지 못한다고 쓴다<a class="cite" href="https://github.com/JoshuaSP/open-jev" title="JoshuaSP/open-jev README">20</a>. decider의 기본 <code>plain/state_first</code> 배치는 상태 뒤에 질문과 답 슬롯을 번갈아 놓는다. causal 백본이므로 각 답 슬롯은 상태, 자기 질문, 앞선 질문을 보고 뒤쪽 질문은 보지 못한다. <code>schema_first</code>와 <code>chat</code> 배치는 모든 질문 뒤에 답 슬롯을 놓으므로 모든 질문을 볼 수 있다. 어느 배치든 답 문자를 입력에 넣지 않아 앞선 답은 보지 않는다<a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/decider/prompt.py" title="Mapika/decider prompt.py">21</a><a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/decider/model.py" title="decider model.py">71</a>.</p>
 <p>격리는 질문 사이의 영향만 막는다. Kev 카드는 한 질문 안의 보기 순서가 여전히 답을 바꿀 수 있고, 격리가 이를 막지 못한다고 쓴다<a class="cite" href="https://huggingface.co/jaredpalmer/kev-4b" title="jaredpalmer/kev-4b 모델 카드">22</a> <span class="tag t-self">자체 보고</span>.</p>
 <blockquote lang="en"><p>this does not reproduce Jev's independent-question isolation.</p><footer><a class="cite" href="https://github.com/JoshuaSP/open-jev" title="JoshuaSP/open-jev README">20</a></footer></blockquote>
-<blockquote lang="en"><p>No answer letters are ever inserted, so slot k sees the context and all questions but no earlier answers</p><footer><a class="cite" href="https://raw.githubusercontent.com/Mapika/decider/main/decider/prompt.py" title="Mapika/decider prompt.py">21</a></footer></blockquote>
+<p><code>prompt.py</code>의 파일 첫 주석은 모든 질문을 본다고 쓰지만, 기본 <code>build()</code>의 실제 입력 순서에는 맞지 않는다. 위 설명은 주석 대신 배치별 입력 구성과 causal 백본을 기준으로 했다.</p>
 <blockquote lang="en"><p>Option order can change an answer; question isolation does not prevent this.</p><footer><a class="cite" href="https://huggingface.co/jaredpalmer/kev-4b" title="jaredpalmer/kev-4b 모델 카드">22</a></footer></blockquote>
 </details>
 
@@ -660,8 +660,10 @@ return answer, p                             # nothing is generated: 0 output to
 <li><span class="src-n">[19]</span><a href="https://github.com/MoLeMo-Lab/mojev">MoJev README</a>: 후보별 attention 마스크</li>
 <li><span class="src-n">[8]</span><a href="https://vllm-sr.ai/decision-paper.pdf">Decision 1.0 논문</a>: 질문마다 forward pass, 상태 활성값 재사용 없음</li>
 <li><span class="src-n">[20]</span><a href="https://github.com/JoshuaSP/open-jev">JoshuaSP/open-jev README</a>: 디퓨전 방식의 격리 불가</li>
-<li><span class="src-n">[21]</span><a href="https://raw.githubusercontent.com/Mapika/decider/main/decider/prompt.py">Mapika/decider prompt.py</a>: 슬롯이 모든 질문을 봄</li>
+<li><span class="src-n">[21]</span><a href="https://raw.githubusercontent.com/Mapika/decider/main/decider/prompt.py">Mapika/decider prompt.py</a>: 배치별 질문과 답 슬롯의 순서</li>
 <li><span class="src-n">[22]</span><a href="https://huggingface.co/jaredpalmer/kev-4b">jaredpalmer/kev-4b 모델 카드</a>: 보기 순서 민감성</li>
+<li><span class="src-n">[70]</span><a href="https://raw.githubusercontent.com/stephanj/parallelConstraintDecoding/master/java/src/main/java/pcd/Prompts.java">PCD Prompts.java</a>: 공유 prefix에 넣는 전체 필드 설명과 선택지</li>
+<li><span class="src-n">[71]</span><a href="https://raw.githubusercontent.com/Mapika/decider/main/decider/model.py">decider model.py</a>: causal 백본과 답 슬롯의 hidden state 읽기</li>
 </ul></details>
 </section>
 
@@ -1270,15 +1272,16 @@ p(i) = exp(z_i / T) / sum_k exp(z_k / T)       (padded candidates masked)</code>
 </details>
 </figure>
 <p>보정은 답 하나가 아니라 답 묶음의 성질이다. "80% 확신" 답 하나가 맞는지는 보장하지 않는다<a class="cite" href="https://docs.typesafe.ai/introduction/machine-learning-primer" title="TypeSafe machine learning primer">24</a>.</p>
-<p>보정을 숫자 하나로 잰 것이 <a class="term" href="#g-ece">ECE</a>(expected calibration error)다. 확률 구간마다 "말한 확률"과 "실제 정답률"의 차이를 구하고, 구간의 답 수로 가중 평균한다. 0이면 완벽하다. 그림 5-1의 모델 B는 답이 모두 80% 구간에 있으므로 ECE가 0.8 − 0.6 = 0.2이고, 모델 A는 0이다. 계산식과 예는 아래 상자에 있다.</p>
+<p>보정을 숫자 하나로 잰 것이 <a class="term" href="#g-ece">ECE</a>(expected calibration error)다. 확률 구간마다 "말한 확률"과 "실제 정답률"의 차이를 구하고, 구간의 답 수로 가중 평균한다. 0이면 해당 표본과 구간 설정에서 측정한 오차가 없다는 뜻이다. 완벽한 보정을 보장하지는 않는다. 그림 5-1의 모델 B는 답이 모두 80% 구간에 있으므로 ECE가 0.8 − 0.6 = 0.2이고, 모델 A는 0이다. 계산식과 예는 아래 상자에 있다.</p>
 <details class="deep"><summary>깊이 보기: 보정을 재는 수, ECE와 Brier 점수</summary>
-<p><dfn id="d-ece">ECE</dfn>(expected calibration error)는 보정 오차를 한 수로 줄인 값이다. 0이면 완벽하다. 계산은 세 단계다.</p>
+<p><dfn id="d-ece">ECE</dfn>(expected calibration error)는 보정 오차를 한 수로 줄인 값이다. 같은 구간 안에서 과신과 과소신이 상쇄될 수 있으므로, 0이어도 완벽한 보정이라고 단정할 수 없다<a class="cite" href="https://arxiv.org/html/1904.01685v2" title="Measuring Calibration in Deep Learning">72</a>. 계산은 세 단계다.</p>
 <ol>
 <li>답을 확률 구간으로 나눈다.</li>
 <li>구간마다 평균 확률과 실제 정답률의 차이를 구한다.</li>
 <li>그 차이를 구간의 답 수로 가중 평균한다.</li>
 </ol>
 <p>예를 들어 평균 확률 0.9인 구간에 답 50개가 있고 정답률이 0.7이라고 하자. 평균 확률 0.6인 다른 구간에도 답 50개가 있고 정답률이 0.6이다. ECE는 0.5×0.2 + 0.5×0 = 0.1이다.</p>
+<p>예를 들어 같은 수의 예측 두 집단이 각각 확률 0.81과 0.89를 내고, 실제 정답률은 1.00과 0.70이라고 하자. 둘을 0.8–0.9 구간에 묶으면 평균 확률과 정답률이 모두 0.85라 ECE는 0이다. 하지만 두 집단은 각각 0.19만큼 보정이 어긋나 있다.</p>
 <p><dfn id="d-brier">Brier 점수</dfn>는 답마다 확률과 실제 결과(맞으면 1, 틀리면 0)의 차이를 제곱해 평균한 값이다. 낮을수록 좋다. yes에 0.8을 주고 yes가 맞으면 (1−0.8)² = 0.04이고, no가 맞으면 0.8² = 0.64다. ECE와 달리 Brier 점수는 정확도와 보정을 함께 반영한다.</p>
 <pre><code>ECE   = Σ_b (n_b / N) × | acc_b − conf_b |
         b: 확률 구간 (그림 5-4는 폭 0.1인 구간 10개)
@@ -1366,7 +1369,7 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <li><b>싸고 안전하다.</b> 다시 학습하지 않고 숫자 하나만 정한다. 모든 logit을 같은 수로 나누므로 1등 답과 정확도는 그대로다.</li>
 <li><b>결정 모델에 필요하다.</b> "확신 90% 이상이면 자동 처리" 같은 규칙은 확률값 자체를 믿고 움직인다(그림 5-2).</li>
 </ul>
-<p>주의할 점이 둘 있다. 이 온도는 글의 다양성을 정하는 샘플링 온도와 이름만 같다<a class="cite" href="https://huggingface.co/internlm/Intern-Decision-4B" title="internlm/Intern-Decision-4B 카드">27</a>. 또 확률이 임계값을 넘는지로 채점하면 온도가 결과를 바꾼다. <a href="#s8">8절</a>의 Noul 기권 규칙(yes 확률 0.20 초과 0.80 미만이면 기권)이 그런 채점이다.</p>
+<p>주의할 점이 둘 있다. 보정 온도와 샘플링 온도는 모두 <code>softmax(logits / T)</code>로 분포를 조절한다. 연산은 같지만 목적이 다르다. 보정에서는 별도 데이터로 T를 맞춰 확률의 신뢰성을 높이고, 샘플링에서는 조절한 분포에서 토큰을 뽑아 생성의 무작위성을 조절한다<a class="cite" href="https://proceedings.mlr.press/v70/guo17a/guo17a.pdf" title="On Calibration of Modern Neural Networks">73</a><a class="cite" href="https://huggingface.co/docs/transformers/internal/generation_utils#transformers.TemperatureLogitsWarper" title="Transformers TemperatureLogitsWarper">74</a>. 또 확률이 임계값을 넘는지로 채점하면 온도가 결과를 바꾼다. <a href="#s8">8절</a>의 Noul 기권 규칙(yes 확률 0.20 초과 0.80 미만이면 기권)이 그런 채점이다.</p>
 <p>아래 그림에서 온도를 직접 바꿔 본다. 데이터는 지어낸 yes/no 결정 400개다. 막대 끝이 점선(완벽한 보정)에 닿을수록 보정이 잘 된 것이다.</p>
 <figure id="fig-s7-1">
 <div class="rel-controls" hidden>
@@ -1539,6 +1542,9 @@ Brier = (1/N) × Σ_i (p_i − y_i)²
 <li><span class="src-n">[33]</span><a href="https://raw.githubusercontent.com/Mapika/decider/main/docs/RL.md">decider RL.md</a>: belief log 점수 항</li>
 <li><span class="src-n">[66]</span><a href="https://raw.githubusercontent.com/fstandhartinger/jevbench/main/docs/METHOD-v1.5.md">JevBench 방법 문서 (METHOD-v1.5)</a>: Capability 산식</li>
 <li><span class="src-n">[41]</span><a href="https://huggingface.co/spaces/multimodalart/jev-decision-index/resolve/main/data/index.json">Decision Index 0.3 데이터</a>: 보정 보고 범위, Jev ECE와 Brier 점수</li>
+<li><span class="src-n">[72]</span><a href="https://arxiv.org/html/1904.01685v2">Measuring Calibration in Deep Learning</a>: 구간 내 오차 상쇄와 ECE의 한계</li>
+<li><span class="src-n">[73]</span><a href="https://proceedings.mlr.press/v70/guo17a/guo17a.pdf">On Calibration of Modern Neural Networks</a>: temperature scaling의 식과 보정 목적</li>
+<li><span class="src-n">[74]</span><a href="https://huggingface.co/docs/transformers/internal/generation_utils#transformers.TemperatureLogitsWarper">Transformers TemperatureLogitsWarper</a>: 샘플링에서 온도로 분포를 조절하는 방법</li>
 </ul></details>
 <script>
 (function () {
@@ -1726,6 +1732,7 @@ for k, q in enumerate(questions, 1):
 H = model(prompt)                                      # README: all slots in one forward pass
 logits = H[slot_k] @ W_letters[:n_options]             # README: slot hidden state -&gt; option letters
 ce = cross_entropy(logits, gold_index)                 # train.py loss_fn
+loss = ce
 if brier_w &gt; 0:                                        # train.py: default brier_w = 0.0
     p = softmax(logits)
     loss = ce + brier_w * sum((p - one_hot(gold))**2)
@@ -2322,6 +2329,11 @@ expected:     yes</code></pre>
 <li><a href="https://benchmarkheaven.com/jev-models/api">JevBench API 보드</a></li>
 <li><a href="https://arxiv.org/abs/1810.04805">BERT 논문 (arXiv 1810.04805)</a></li>
 <li><a href="https://arxiv.org/abs/2609.32160">Jev 감사 논문 (arXiv 2609.32160)</a></li>
+<li value="70"><a href="https://raw.githubusercontent.com/stephanj/parallelConstraintDecoding/master/java/src/main/java/pcd/Prompts.java">PCD Prompts.java</a></li>
+<li value="71"><a href="https://raw.githubusercontent.com/Mapika/decider/main/decider/model.py">decider model.py</a></li>
+<li value="72"><a href="https://arxiv.org/html/1904.01685v2">Measuring Calibration in Deep Learning</a></li>
+<li value="73"><a href="https://proceedings.mlr.press/v70/guo17a/guo17a.pdf">On Calibration of Modern Neural Networks</a></li>
+<li value="74"><a href="https://huggingface.co/docs/transformers/internal/generation_utils#transformers.TemperatureLogitsWarper">Transformers TemperatureLogitsWarper</a></li>
 </ol></details>
 <h3 id="s9-3">상태 표시</h3>
 <details class="sources-box" id="s9-legend"><summary>상태 표시 (문장 끝 태그의 뜻)</summary>
